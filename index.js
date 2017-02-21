@@ -57,7 +57,7 @@ class SimpleKeyring extends EventEmitter {
     return Promise.resolve(tx)
   }
 
-  // For eth_sign, we need to sign transactions:
+  // For eth_sign, we need to sign arbitrary data:
   signMessage (withAccount, data) {
     const wallet = this._getWalletForAccount(withAccount)
     const message = ethUtil.stripHexPrefix(data)
@@ -67,9 +67,8 @@ class SimpleKeyring extends EventEmitter {
     return Promise.resolve(rawMsgSig)
   }
 
-  // For eth_sign, we need to sign transactions:
-
-  newGethSignMessage (withAccount, msgHex) {
+  // For personal_sign, we need to prefix the message:
+  personalSignMessage (withAccount, msgHex) {
     const wallet = this._getWalletForAccount(withAccount)
     const privKey = wallet.getPrivateKey()
     const msgBuffer = ethUtil.toBuffer(msgHex)
@@ -79,6 +78,7 @@ class SimpleKeyring extends EventEmitter {
     return Promise.resolve(rawMsgSig)
   }
 
+  // exportAccount should return a hex-encoded private key:
   exportAccount (address) {
     const wallet = this._getWalletForAccount(address)
     return Promise.resolve(wallet.getPrivateKey().toString('hex'))

@@ -4,6 +4,7 @@ const Web3 = require('web3')
 const web3 = new Web3()
 const ethUtil = require('ethereumjs-util')
 const SimpleKeyring = require('../')
+const sigUtil = require('eth-sig-util')
 const TYPE_STR = 'Simple Key Pair'
 
 // Sample account:
@@ -143,6 +144,35 @@ describe('simple-keyring', function() {
         assert.equal(output[0], desiredOutput)
         assert.equal(output.length, 1)
         done()
+      })
+    })
+  })
+
+  describe('#signPersonalMessage', function () {
+    it('returns the expected value', function (done) {
+      const address = '0xbe93f9bacbcffc8ee6663f2647917ed7a20a57bb'
+      const privateKey = new Buffer('6969696969696969696969696969696969696969696969696969696969696969', 'hex')
+      const privKeyHex = ethUtil.bufferToHex(privateKey)
+      const message = '0x68656c6c6f20776f726c64'
+      const signature = '0xce909e8ea6851bc36c007a0072d0524b07a3ff8d4e623aca4c71ca8e57250c4d0a3fc38fa8fbaaa81ead4b9f6bd03356b6f8bf18bccad167d78891636e1d69561b'
+
+      keyring.deserialize([privKeyHex])
+      .then(() => {
+        return keyring.signPersonalMessage(address, message)
+      })
+      .then((sig) => {
+        assert.equal(sig, signature, 'signature matches')
+
+        const restored = sigUtil.recoverPersonalSignature({
+          data: message,
+          sig,
+        })
+
+        assert.equal(restored, address, 'recovered address')
+        done()
+      })
+      .catch((reason) => {
+        console.log('failed because', reason)
       })
     })
   })

@@ -68,14 +68,12 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // For personal_sign, we need to prefix the message:
-  personalSignMessage (withAccount, msgHex) {
+  signPersonalMessage (withAccount, msgHex) {
     const wallet = this._getWalletForAccount(withAccount)
-    const privKey = wallet.getPrivateKey()
-    const msgBuffer = ethUtil.toBuffer(msgHex)
-    const msgHash = ethUtil.hashPersonalMessage(msgBuffer)
-    const msgSig = ethUtil.ecsign(msgHash, privKey)
-    const rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
-    return Promise.resolve(rawMsgSig)
+    const privKey = ethUtil.stripHexPrefix(wallet.getPrivateKey())
+    const privKeyBuffer = new Buffer(privKey, 'hex')
+    const sig = sigUtil.personalSign(privKeyBuffer, { data: msgHex })
+    return Promise.resolve(sig)
   }
 
   // exportAccount should return a hex-encoded private key:

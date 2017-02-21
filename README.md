@@ -1,4 +1,4 @@
-# Simple Keyring
+# Simple Keyring [![CircleCI](https://circleci.com/gh/MetaMask/eth-simple-keyring.svg?style=svg)](https://circleci.com/gh/MetaMask/eth-simple-keyring)
 
 A simple JS class wrapped around [ethereumjs-wallet](https://github.com/ethereumjs/ethereumjs-wallet) designed to expose an interface common to many different signing strategies, to be used in a `KeyringController`, like is being used in [MetaMask](https://metamask.io/)
 

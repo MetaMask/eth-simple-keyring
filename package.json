@@ -1,0 +1,35 @@
+{
+  "name": "eth-simple-keyring",
+  "version": "1.0.0",
+  "description": "A simple standard interface for a series of Ethereum private keys.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/flyswatter/eth-simple-keyring.git"
+  },
+  "keywords": [
+    "ethereum",
+    "keyring"
+  ],
+  "author": "Dan Finlay",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/flyswatter/eth-simple-keyring/issues"
+  },
+  "homepage": "https://github.com/flyswatter/eth-simple-keyring#readme",
+  "dependencies": {
+    "eth-sig-util": "^1.0.0",
+    "ethereumjs-util": "^5.1.1",
+    "ethereumjs-wallet": "^0.6.0",
+    "events": "^1.1.1"
+  },
+  "devDependencies": {
+    "assert": "^1.4.1",
+    "extend": "^3.0.0",
+    "mocha": "^3.2.0",
+    "web3": "^0.18.2"
+  }
+}

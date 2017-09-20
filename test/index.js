@@ -176,4 +176,32 @@ describe('simple-keyring', function() {
       })
     })
   })
+
+  describe('#signTypedData', function () {
+    const address = '0x29c76e6ad8f28bb1004902578fb108c507be341b'
+    const privKeyHex = '0x4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0'
+
+    it('returns the expected value', function (done) {
+      const expectedSignature = '0x49e75d475d767de7fcc67f521e0d86590723d872e6111e51c393e8c1e2f21d032dfaf5833af158915f035db6af4f37bf2d5d29781cd81f28a44c5cb4b9d241531b'
+
+      const typedData = [
+          {
+              type: 'string',
+              name: 'message',
+              value: 'Hi, Alice!'
+          }
+      ]
+
+      keyring.deserialize([privKeyHex]).then(function () {
+        return keyring.signTypedData(address, typedData)
+      }).then(function (sig) {
+        assert.equal(sig, expectedSignature, 'signature matches')
+        const restored = sigUtil.ecrecoverTypedData({ data: typedData, sig: sig })
+        assert.equal(restored, address, 'recovered address')
+        done()
+      }).catch(function (reason) {
+        console.log('failed because', reason)
+      })
+    })
+  })
 })

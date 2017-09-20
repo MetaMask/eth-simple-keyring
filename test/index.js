@@ -196,7 +196,7 @@ describe('simple-keyring', function() {
         return keyring.signTypedData(address, typedData)
       }).then(function (sig) {
         assert.equal(sig, expectedSignature, 'signature matches')
-        const restored = sigUtil.ecrecoverTypedData({ data: typedData, sig: sig })
+        const restored = sigUtil.recoverTypedSignature({ data: typedData, sig: sig })
         assert.equal(restored, address, 'recovered address')
         done()
       }).catch(function (reason) {

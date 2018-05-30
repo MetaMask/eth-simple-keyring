@@ -1,10 +1,8 @@
 const assert = require('assert')
-const extend = require('xtend')
-const Web3 = require('web3')
-const web3 = new Web3()
 const ethUtil = require('ethereumjs-util')
-const SimpleKeyring = require('../')
 const sigUtil = require('eth-sig-util')
+const SimpleKeyring = require('../')
+
 const TYPE_STR = 'Simple Key Pair'
 
 // Sample account:
@@ -74,7 +72,7 @@ describe('simple-keyring', () => {
 
     it('reliably can decode messages it signs', async () => {
       const message = 'hello there!'
-      const msgHashHex = web3.sha3(message)
+      const msgHashHex = ethUtil.bufferToHex(ethUtil.sha3(message))
 
       await keyring.deserialize([ privateKey ])
       await keyring.addAccounts(9)

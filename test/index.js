@@ -8,7 +8,10 @@ const sigUtil = require('eth-sig-util')
 const TYPE_STR = 'Simple Key Pair'
 
 // Sample account:
-const privKeyHex = 'b8a9c05beeedb25df85f8d641538cbffedf67216048de9c678ee26260eb91952'
+const testAccount = {
+  key: '0xb8a9c05beeedb25df85f8d641538cbffedf67216048de9c678ee26260eb91952',
+  address: '0x01560cd3bac62cc6d7e6380600d9317363400896',
+}
 
 describe('simple-keyring', () => {
 
@@ -40,10 +43,12 @@ describe('simple-keyring', () => {
 
   describe('#deserialize a private key', () => {
     it('serializes what it deserializes', async () => {
-      await keyring.deserialize([privKeyHex])
+      await keyring.deserialize([testAccount.key])
       assert.equal(keyring.wallets.length, 1, 'has one wallet')
-      const serialized = keyring.serialize()
-      assert.equal(serialized[0], privKeyHex)
+      const serialized = await keyring.serialize()
+      assert.equal(serialized[0], ethUtil.stripHexPrefix(testAccount.key))
+      const accounts = await keyring.getAccounts()
+      assert.deepEqual(accounts, [testAccount.address], 'accounts match expected')
     })
   })
 
@@ -60,7 +65,6 @@ describe('simple-keyring', () => {
     })
 
     it('reliably can decode messages it signs', async () => {
-
       const message = 'hello there!'
       const msgHashHex = web3.sha3(message)
 

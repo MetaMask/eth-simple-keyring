@@ -52,6 +52,14 @@ describe('simple-keyring', () => {
     })
   })
 
+  describe('#constructor with a private key', () => {
+    it('has the correct addresses', async () => {
+      const keyring = new SimpleKeyring([testAccount.key])
+      const accounts = await keyring.getAccounts()
+      assert.deepEqual(accounts, [testAccount.address], 'accounts match expected')
+    })
+  })
+
   describe('#signMessage', () => {
     const address = '0x9858e7d8b79fc3e6d989636721584498926da38a'
     const message = '0x879a053d4800c6354e76c7985a865d2922c82fb5b3f4577b2fe08b998954f2e0'

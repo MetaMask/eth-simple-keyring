@@ -11,8 +11,8 @@ class SimpleKeyring extends EventEmitter {
   constructor (opts) {
     super()
     this.type = type
-    this.opts = opts || {}
     this.wallets = []
+    this.deserialize(opts)
   }
 
   serialize () {

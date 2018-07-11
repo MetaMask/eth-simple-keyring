@@ -2,6 +2,7 @@ const assert = require('assert')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
 const SimpleKeyring = require('../')
+const {expect} = require('chai')
 
 const TYPE_STR = 'Simple Key Pair'
 
@@ -125,6 +126,28 @@ describe('simple-keyring', () => {
       const output = await keyring.getAccounts()
       assert.equal(output[0], desiredOutput)
       assert.equal(output.length, 1)
+    })
+  })
+
+  describe('#removeAccount', () => {
+    describe('if the account exists', () => {
+      it('should remove that account', async () => {
+        await keyring.addAccounts()
+        const addresses = await keyring.getAccounts()
+        keyring.removeAccount(addresses[0])
+        const addressesAfterRemoval = await keyring.getAccounts()
+        assert.equal(addressesAfterRemoval.length, addresses.length -1)
+      })
+    })
+
+    describe('if the account does not exist', () => {
+      it('should throw an error', (done) => {
+        const unexistingAccount = '0x0000000000000000000000000000000000000000'
+        expect(_ => {
+           keyring.removeAccount(unexistingAccount)
+        }).to.throw(`Address ${unexistingAccount} not found in this keyring`)
+        done()
+      })
     })
   })
 

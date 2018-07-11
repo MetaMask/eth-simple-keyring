@@ -2,7 +2,7 @@ const assert = require('assert')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
 const SimpleKeyring = require('../')
-const {expect} = require('chai')
+const { expect } = require('chai')
 
 const TYPE_STR = 'Simple Key Pair'
 

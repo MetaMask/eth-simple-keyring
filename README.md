@@ -67,3 +67,7 @@ The `eth_sign` method will receive the incoming data, alread hashed, and must si
 
 Exports the specified account as a private key hex string.
 
+### removeAccount(address)
+
+removes the specified account from the list of accounts.
+

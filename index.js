@@ -90,6 +90,12 @@ class SimpleKeyring extends EventEmitter {
     return Promise.resolve(wallet.getPrivateKey().toString('hex'))
   }
 
+  removeAccount (address) {
+    if(!this.wallets.map(w => ethUtil.bufferToHex(w.getAddress()).toLowerCase()).includes(address.toLowerCase())){
+      throw new Error(`Address ${address} not found in this keyring`)
+    }
+    this.wallets = this.wallets.filter( w => ethUtil.bufferToHex(w.getAddress()).toLowerCase() !== address.toLowerCase())
+  }
 
   /* PRIVATE METHODS */
 

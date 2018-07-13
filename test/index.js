@@ -177,15 +177,16 @@ describe('simple-keyring', () => {
     const privKeyHex = '0x4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0'
 
     it('returns the expected value', async () => {
-      const expectedSignature = '0x49e75d475d767de7fcc67f521e0d86590723d872e6111e51c393e8c1e2f21d032dfaf5833af158915f035db6af4f37bf2d5d29781cd81f28a44c5cb4b9d241531b'
+      const expectedSignature = '0xf2951a651df0a79b29a38215f9669b06499fa45d3b41c7acedd49c1050e8439f3283156a0797113c9c06c1df844495071aaa5721ea39198b46bf462f7417dfba1b'
 
-      const typedData = [
-          {
-              type: 'string',
-              name: 'message',
-              value: 'Hi, Alice!'
-          }
-      ]
+      const typedData = {
+        types: {
+          EIP712Domain: []
+        },
+        domain: {},
+        primaryType: 'EIP712Domain',
+        message: {}
+      }
 
       await keyring.deserialize([privKeyHex])
       const sig = await keyring.signTypedData(address, typedData)

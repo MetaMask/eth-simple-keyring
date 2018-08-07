@@ -2,6 +2,7 @@ const assert = require('assert')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
 const SimpleKeyring = require('../')
+const EthereumTx = require('ethereumjs-tx')
 const { expect } = require('chai')
 
 const TYPE_STR = 'Simple Key Pair'
@@ -56,6 +57,28 @@ describe('simple-keyring', () => {
       const keyring = new SimpleKeyring([testAccount.key])
       const accounts = await keyring.getAccounts()
       assert.deepEqual(accounts, [testAccount.address], 'accounts match expected')
+    })
+  })
+
+  describe('#signTransaction', () => {
+    const address = '0x9858e7d8b79fc3e6d989636721584498926da38a'
+    const privateKey = '0x7dd98753d7b4394095de7d176c58128e2ed6ee600abe97c9f6d9fd65015d9b18'
+
+    it('returns a signed tx object', async () => {
+      await keyring.deserialize([ privateKey ])
+
+      const txParams = {
+        from: address,
+        nonce: '0x00',
+        gasPrice: '0x09184e72a000',
+        gasLimit: '0x2710',
+        to: address,
+        value: '0x1000',
+      }
+      const tx = new EthereumTx(txParams)
+
+      const signed = await keyring.signTransaction(address, tx)
+      assert.ok(signed.raw, 'has a raw signature')
     })
   })
 

@@ -2,7 +2,7 @@ const assert = require('assert')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
 const SimpleKeyring = require('../')
-const EthereumTx = require('ethereumjs-tx')
+const EthereumTx = require('ethereumjs-tx').Transaction
 const { expect } = require('chai')
 
 const TYPE_STR = 'Simple Key Pair'
@@ -200,7 +200,7 @@ describe('simple-keyring', () => {
     const privKeyHex = '0x4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0'
 
     it('returns the expected value', async () => {
-      const expectedSignature = '0xf2951a651df0a79b29a38215f9669b06499fa45d3b41c7acedd49c1050e8439f3283156a0797113c9c06c1df844495071aaa5721ea39198b46bf462f7417dfba1b'
+      const expectedSignature = '0x24367b495e5d9f1fabc6e66abaaf0f3e5fe6fd984d5870a72523a1add3f3efdd41005bceba75e7c3ee96c233a5c7b4fe5642a58966eb46de25f111f541b272b31b'
 
       const typedData = {
         types: {
@@ -216,6 +216,20 @@ describe('simple-keyring', () => {
       assert.equal(sig, expectedSignature, 'signature matches')
       const restored = sigUtil.recoverTypedSignature({ data: typedData, sig: sig })
       assert.equal(restored, address, 'recovered address')
+    })
+  })
+  
+  describe('#decryptMessage', () => {
+    it('returns the expected value', async () => {
+      const address = '0xbe93f9bacbcffc8ee6663f2647917ed7a20a57bb'
+      const privateKey = new Buffer('6969696969696969696969696969696969696969696969696969696969696969', 'hex')
+      const privKeyHex = ethUtil.bufferToHex(privateKey)
+      const message = 'Hello world!'
+	  const encryptedMessage = sigUtil.encrypt(sigUtil.getEncryptionPublicKey(privateKey), {'data': message}, 'x25519-xsalsa20-poly1305')
+	  
+	  await keyring.deserialize([privKeyHex])
+      const decryptedMessage = await keyring.decryptMessage(address, encryptedMessage)
+      assert.equal(message, decryptedMessage, 'signature matches')
     })
   })
 })

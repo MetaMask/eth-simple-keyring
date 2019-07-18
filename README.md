@@ -61,7 +61,11 @@ You must return a valid signed ethereumjs-tx (https://github.com/ethereumjs/ethe
 
 ### signMessage(address, data)
 
-The `eth_sign` method will receive the incoming data, alread hashed, and must sign that hash, and then return the raw signed hash.
+The `eth_sign` method will receive the incoming data, already hashed, and must sign that hash, and then return the raw signed hash.
+
+### decryptMessage(address, data)
+
+The `eth_decryptMessage` method will receive the incoming data in array format that returns `encrypt` function in `eth-sig-util` and must decrypt message, and then return the raw message.
 
 ### exportAccount(address)
 

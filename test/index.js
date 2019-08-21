@@ -218,4 +218,87 @@ describe('simple-keyring', () => {
       assert.equal(restored, address, 'recovered address')
     })
   })
+
+  describe('getAppKeyAddress', function () {
+    it('should return a public address custom to the provided app key origin', async function () {
+      const address = testAccount.address
+      const keyring = new SimpleKeyring([testAccount.key])
+
+      const appKeyAddress = await keyring.getAppKeyAddress(address, 'someapp.origin.io')
+
+      assert.notEqual(address, appKeyAddress)
+      assert(ethUtil.isValidAddress(appKeyAddress))
+    })
+
+    it('should return different addresses when provided different app key origins', async function () {
+      const address = testAccount.address
+      const keyring = new SimpleKeyring([testAccount.key])
+
+      const appKeyAddress1 = await keyring.getAppKeyAddress(address, 'someapp.origin.io')
+
+      assert(ethUtil.isValidAddress(appKeyAddress1))
+
+      const appKeyAddress2 = await keyring.getAppKeyAddress(address, 'anotherapp.origin.io')
+
+      assert(ethUtil.isValidAddress(appKeyAddress2))
+
+      assert.notEqual(appKeyAddress1, appKeyAddress2)
+    })
+
+    it('should return the same address when called multiple times with the same params', async function () {
+      const address = testAccount.address
+      const keyring = new SimpleKeyring([testAccount.key])
+
+      const appKeyAddress1 = await keyring.getAppKeyAddress(address, 'someapp.origin.io')
+
+      assert(ethUtil.isValidAddress(appKeyAddress1))
+
+      const appKeyAddress2 = await keyring.getAppKeyAddress(address, 'someapp.origin.io')
+
+      assert(ethUtil.isValidAddress(appKeyAddress2))
+
+      assert.equal(appKeyAddress1, appKeyAddress2)
+    })
+  })
+
+  describe('signing methods withAppKeyOrigin option', function () {
+    it('should signPersonalMessage with the expected key when passed a withAppKeyOrigin', async function () {
+      const address = testAccount.address
+      const message = '0x68656c6c6f20776f726c64'
+
+      const privateKeyHex = '9d64eb3c133311fe136a89c1e730a320f573d7832965069b316122999db2ca4e'
+      const privateKeyBuffer = new Buffer(privateKeyHex, 'hex')
+      const expectedSig = sigUtil.personalSign(privateKeyBuffer, { data: message })
+
+      const keyring = new SimpleKeyring([testAccount.key])
+      const sig = await keyring.signPersonalMessage(address, message, {
+        withAppKeyOrigin: 'someapp.origin.io',
+      })
+
+      assert.equal(expectedSig, sig, 'sign with app key generated private key')
+    })
+
+    it('should signPersonalMessage with the expected key when passed a withAppKeyOrigin', async function () {
+      const address = testAccount.address
+      const typedData = {
+        types: {
+          EIP712Domain: []
+        },
+        domain: {},
+        primaryType: 'EIP712Domain',
+        message: {}
+      }
+
+      const privateKeyHex = '9d64eb3c133311fe136a89c1e730a320f573d7832965069b316122999db2ca4e'
+      const privateKeyBuffer = new Buffer(privateKeyHex, 'hex')
+      const expectedSig = sigUtil.signTypedData(privateKeyBuffer, { data: typedData })
+
+      const keyring = new SimpleKeyring([testAccount.key])
+      const sig = await keyring.signTypedData(address, typedData, {
+        withAppKeyOrigin: 'someapp.origin.io',
+      })
+
+      assert.equal(expectedSig, sig, 'sign with app key generated private key')
+    })
+  })
 })

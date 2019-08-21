@@ -86,11 +86,17 @@ class SimpleKeyring extends EventEmitter {
 
   // returns an address specific to an app
   getAppKeyAddress (address, origin) {
-    const wallet = this._getWalletForAccount(address, {
-      withAppKeyOrigin: origin,
+    return new Promise((resolve, reject) => {
+      try {
+        const wallet = this._getWalletForAccount(address, {
+          withAppKeyOrigin: origin,
+        })
+        const appKeyAddress = wallet.getAddress()
+        return resolve(appKeyAddress)
+      } catch (e) {
+        return reject(e)
+      }
     })
-    const appKeyAddress = wallet.getAddress()
-    return Promise.resolve(appKeyAddress)
   }
 
   // exportAccount should return a hex-encoded private key:

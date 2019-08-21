@@ -91,7 +91,7 @@ class SimpleKeyring extends EventEmitter {
         const wallet = this._getWalletForAccount(address, {
           withAppKeyOrigin: origin,
         })
-        const appKeyAddress = wallet.getAddress()
+        const appKeyAddress = sigUtil.normalize(wallet.getAddress().toString('hex'))
         return resolve(appKeyAddress)
       } catch (e) {
         return reject(e)

@@ -50,7 +50,7 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // tx is an instance of the ethereumjs-transaction class.
-  signTransaction (address, tx, opts) {
+  signTransaction (address, tx, opts = {}) {
     const wallet = this._getWalletForAccount(address, opts)
     var privKey = wallet.getPrivateKey()
     tx.sign(privKey)
@@ -58,7 +58,7 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // For eth_sign, we need to sign arbitrary data:
-  signMessage (withAccount, data, opts) {
+  signMessage (withAccount, data, opts = {}) {
     const wallet = this._getWalletForAccount(withAccount, opts)
     const message = ethUtil.stripHexPrefix(data)
     var privKey = wallet.getPrivateKey()
@@ -68,7 +68,7 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // For personal_sign, we need to prefix the message:
-  signPersonalMessage (withAccount, msgHex, opts) {
+  signPersonalMessage (withAccount, msgHex, opts = {}) {
     const wallet = this._getWalletForAccount(withAccount, opts)
     const privKey = ethUtil.stripHexPrefix(wallet.getPrivateKey())
     const privKeyBuffer = new Buffer(privKey, 'hex')
@@ -77,7 +77,7 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // personal_signTypedData, signs data along with the schema
-  signTypedData (withAccount, typedData, opts) {
+  signTypedData (withAccount, typedData, opts = {}) {
     const wallet = this._getWalletForAccount(withAccount, opts)
     const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
     const sig = sigUtil.signTypedData(privKey, { data: typedData })
@@ -108,7 +108,7 @@ class SimpleKeyring extends EventEmitter {
 
   /* PRIVATE METHODS */
 
-  _getWalletForAccount (account, opts) {
+  _getWalletForAccount (account, opts = {}) {
     const address = sigUtil.normalize(account)
     let wallet = this.wallets.find(w => ethUtil.bufferToHex(w.getAddress()) === address)
     if (!wallet) throw new Error('Simple Keyring - Unable to find matching address.')

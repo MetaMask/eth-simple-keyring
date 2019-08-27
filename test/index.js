@@ -266,7 +266,7 @@ describe('simple-keyring', () => {
       const address = testAccount.address
       const message = '0x68656c6c6f20776f726c64'
 
-      const privateKeyHex = '9d64eb3c133311fe136a89c1e730a320f573d7832965069b316122999db2ca4e'
+      const privateKeyHex = '4fbe006f0e9c2374f53eb1aef1b6970d20206c61ea05ad9591ef42176eb842c0'
       const privateKeyBuffer = new Buffer(privateKeyHex, 'hex')
       const expectedSig = sigUtil.personalSign(privateKeyBuffer, { data: message })
 
@@ -289,7 +289,7 @@ describe('simple-keyring', () => {
         message: {}
       }
 
-      const privateKeyHex = '9d64eb3c133311fe136a89c1e730a320f573d7832965069b316122999db2ca4e'
+      const privateKeyHex = '4fbe006f0e9c2374f53eb1aef1b6970d20206c61ea05ad9591ef42176eb842c0'
       const privateKeyBuffer = new Buffer(privateKeyHex, 'hex')
       const expectedSig = sigUtil.signTypedData(privateKeyBuffer, { data: typedData })
 

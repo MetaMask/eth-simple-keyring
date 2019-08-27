@@ -121,7 +121,7 @@ class SimpleKeyring extends EventEmitter {
 
     if (opts.withAppKeyOrigin) {
       const privKey = wallet.getPrivateKey()
-      const appKeyPrivKey = ethUtil.keccak(privKey + opts.withAppKeyOrigin, 256)
+      const appKeyPrivKey = ethUtil.keccak(privKey.toString('hex') + opts.withAppKeyOrigin, 256)
       wallet = Wallet.fromPrivateKey(appKeyPrivKey)
     }
 

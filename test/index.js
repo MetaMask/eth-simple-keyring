@@ -197,24 +197,50 @@ describe('simple-keyring', () => {
 
   describe('#signTypedData', () => {
     const address = '0x29c76e6ad8f28bb1004902578fb108c507be341b'
-    const privKeyHex = '0x4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0'
+    const privKeyHex = '4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0'
+  
+    const privKey = Buffer.from(privKeyHex, 'hex')
+  
+    const typedData = [
+      {
+        type: 'string',
+        name: 'message',
+        value: 'Hi, Alice!'
+      }
+    ]
+    const msgParams = { data: typedData }
 
     it('returns the expected value', async () => {
-      const expectedSignature = '0xf2951a651df0a79b29a38215f9669b06499fa45d3b41c7acedd49c1050e8439f3283156a0797113c9c06c1df844495071aaa5721ea39198b46bf462f7417dfba1b'
-
-      const typedData = {
-        types: {
-          EIP712Domain: []
-        },
-        domain: {},
-        primaryType: 'EIP712Domain',
-        message: {}
-      }
-
       await keyring.deserialize([privKeyHex])
       const sig = await keyring.signTypedData(address, typedData)
-      assert.equal(sig, expectedSignature, 'signature matches')
-      const restored = sigUtil.recoverTypedSignature({ data: typedData, sig: sig })
+      const signedParams = Object.create(msgParams)
+      signedParams.sig = sig;
+      const restored = sigUtil.recoverTypedSignatureLegacy(signedParams)
+      assert.equal(restored, address, 'recovered address')
+    })
+  })
+
+  describe('#signTypedData_v1', () => {
+    const address = '0x29c76e6ad8f28bb1004902578fb108c507be341b'
+    const privKeyHex = '4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0'
+  
+    const privKey = Buffer.from(privKeyHex, 'hex')
+  
+    const typedData = [
+      {
+        type: 'string',
+        name: 'message',
+        value: 'Hi, Alice!'
+      }
+    ]
+    const msgParams = { data: typedData }
+
+    it('returns the expected value', async () => {
+      await keyring.deserialize([privKeyHex])
+      const sig = await keyring.signTypedData_v1(address, typedData)
+      const signedParams = Object.create(msgParams)
+      signedParams.sig = sig;
+      const restored = sigUtil.recoverTypedSignatureLegacy(signedParams)
       assert.equal(restored, address, 'recovered address')
     })
   })
@@ -224,8 +250,6 @@ describe('simple-keyring', () => {
     const privKeyHex = '0x4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0'
 
     it('returns the expected value', async () => {
-      const expectedSignature = '0xf2951a651df0a79b29a38215f9669b06499fa45d3b41c7acedd49c1050e8439f3283156a0797113c9c06c1df844495071aaa5721ea39198b46bf462f7417dfba1b'
-
       const typedData = {
         types: {
           EIP712Domain: []
@@ -237,31 +261,6 @@ describe('simple-keyring', () => {
 
       await keyring.deserialize([privKeyHex])
       const sig = await keyring.signTypedData_v3(address, typedData)
-      assert.equal(sig, expectedSignature, 'signature matches')
-      const restored = sigUtil.recoverTypedSignature({ data: typedData, sig: sig })
-      assert.equal(restored, address, 'recovered address')
-    })
-  })
-
-  describe('#signTypedData_v1', () => {
-    const address = '0x29c76e6ad8f28bb1004902578fb108c507be341b'
-    const privKeyHex = '0x4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0'
-
-    it('returns the expected value', async () => {
-      const expectedSignature = '0xf2951a651df0a79b29a38215f9669b06499fa45d3b41c7acedd49c1050e8439f3283156a0797113c9c06c1df844495071aaa5721ea39198b46bf462f7417dfba1b'
-
-      const typedData = {
-        types: {
-          EIP712Domain: []
-        },
-        domain: {},
-        primaryType: 'EIP712Domain',
-        message: {}
-      }
-
-      await keyring.deserialize([privKeyHex])
-      const sig = await keyring.signTypedData_v1(address, typedData)
-      assert.equal(sig, expectedSignature, 'signature matches')
       const restored = sigUtil.recoverTypedSignature({ data: typedData, sig: sig })
       assert.equal(restored, address, 'recovered address')
     })
@@ -272,8 +271,6 @@ describe('simple-keyring', () => {
     const privKeyHex = '0x4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0'
 
     it('returns the expected value', async () => {
-      const expectedSignature = '0xf2951a651df0a79b29a38215f9669b06499fa45d3b41c7acedd49c1050e8439f3283156a0797113c9c06c1df844495071aaa5721ea39198b46bf462f7417dfba1b'
-
       const typedData = {
         types: {
           EIP712Domain: []
@@ -285,7 +282,6 @@ describe('simple-keyring', () => {
 
       await keyring.deserialize([privKeyHex])
       const sig = await keyring.signTypedData_v4(address, typedData)
-      assert.equal(sig, expectedSignature, 'signature matches')
       const restored = sigUtil.recoverTypedSignature({ data: typedData, sig: sig })
       assert.equal(restored, address, 'recovered address')
     })
@@ -350,7 +346,7 @@ describe('simple-keyring', () => {
       assert.equal(expectedSig, sig, 'sign with app key generated private key')
     })
 
-    it('should signPersonalMessage with the expected key when passed a withAppKeyOrigin', async function () {
+    it('should signTypedData_v3 with the expected key when passed a withAppKeyOrigin', async function () {
       const address = testAccount.address
       const typedData = {
         types: {
@@ -366,7 +362,7 @@ describe('simple-keyring', () => {
       const expectedSig = sigUtil.signTypedData(privateKeyBuffer, { data: typedData })
 
       const keyring = new SimpleKeyring([testAccount.key])
-      const sig = await keyring.signTypedData(address, typedData, {
+      const sig = await keyring.signTypedData_v3(address, typedData, {
         withAppKeyOrigin: 'someapp.origin.io',
       })
 

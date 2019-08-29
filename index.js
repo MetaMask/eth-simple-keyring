@@ -78,11 +78,17 @@ class SimpleKeyring extends EventEmitter {
 
   // personal_signTypedData, signs data along with the schema
   signTypedData (withAccount, typedData, opts = {}) {
+    return this.signTypedData_v3(withAccount, typedData, opts);
+  }
+
+  // personal_signTypedData, signs data along with the schema
+  signTypedData_v3 (withAccount, typedData, opts = {}) {
     const wallet = this._getWalletForAccount(withAccount, opts)
     const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
     const sig = sigUtil.signTypedData(privKey, { data: typedData })
     return Promise.resolve(sig)
   }
+
 
   // returns an address specific to an app
   getAppKeyAddress (address, origin) {

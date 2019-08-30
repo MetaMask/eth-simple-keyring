@@ -51,26 +51,23 @@ class SimpleKeyring extends EventEmitter {
 
   // tx is an instance of the ethereumjs-transaction class.
   signTransaction (address, tx, opts = {}) {
-    const wallet = this._getWalletForAccount(address, opts)
-    var privKey = wallet.getPrivateKey()
+    const privKey = this.getPrivateKeyFor(address, opts);
     tx.sign(privKey)
     return Promise.resolve(tx)
   }
 
   // For eth_sign, we need to sign arbitrary data:
-  signMessage (withAccount, data, opts = {}) {
-    const wallet = this._getWalletForAccount(withAccount, opts)
+  signMessage (address, data, opts = {}) {
     const message = ethUtil.stripHexPrefix(data)
-    var privKey = wallet.getPrivateKey()
+    const privKey = this.getPrivateKeyFor(address, opts);
     var msgSig = ethUtil.ecsign(new Buffer(message, 'hex'), privKey)
     var rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
     return Promise.resolve(rawMsgSig)
   }
 
   // For personal_sign, we need to prefix the message:
-  signPersonalMessage (withAccount, msgHex, opts = {}) {
-    const wallet = this._getWalletForAccount(withAccount, opts)
-    const privKey = ethUtil.stripHexPrefix(wallet.getPrivateKey())
+  signPersonalMessage (address, msgHex, opts = {}) {
+    const privKey = this.getPrivateKeyFor(address, opts);
     const privKeyBuffer = new Buffer(privKey, 'hex')
     const sig = sigUtil.personalSign(privKeyBuffer, { data: msgHex })
     return Promise.resolve(sig)

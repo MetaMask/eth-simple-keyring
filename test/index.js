@@ -327,7 +327,7 @@ describe('simple-keyring', () => {
       assert.equal(sig, expectedSig, 'verified signature')
       const signedData = Object.create(typedData)
       signedData.sig = sig
-      const restored = sigUtil.recoverTypedSignature(signedData)
+      const restored = sigUtil.recoverTypedSignature_v4(signedData)
       assert.equal(restored, address, 'recovered address')
     })
   })

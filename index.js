@@ -83,21 +83,21 @@ class SimpleKeyring extends EventEmitter {
 
   // personal_signTypedData, signs data along with the schema
   signTypedData_v1 (withAccount, typedData, opts = {}) {
-    const privKey = this.getPrivateKeyFor(withAccount, opts); 
+    const privKey = this.getPrivateKeyFor(withAccount, opts);
     const sig = sigUtil.signTypedDataLegacy(privKey, { data: typedData })
     return Promise.resolve(sig)
   }
 
   // personal_signTypedData, signs data along with the schema
   signTypedData_v3 (withAccount, typedData, opts = {}) {
-    const privKey = this.getPrivateKeyFor(withAccount, opts); 
+    const privKey = this.getPrivateKeyFor(withAccount, opts);
     const sig = sigUtil.signTypedData(privKey, { data: typedData })
     return Promise.resolve(sig)
   }
 
   // personal_signTypedData, signs data along with the schema
   signTypedData_v4 (withAccount, typedData, opts = {}) {
-    const privKey = this.getPrivateKeyFor(withAccount, opts); 
+    const privKey = this.getPrivateKeyFor(withAccount, opts);
     const sig = sigUtil.signTypedData_v4(privKey, { data: typedData })
     return Promise.resolve(sig)
   }
@@ -108,7 +108,7 @@ class SimpleKeyring extends EventEmitter {
     }
     const wallet = this._getWalletForAccount(address, opts)
     const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
-    return privKey; 
+    return privKey;
   }
 
   // returns an address specific to an app

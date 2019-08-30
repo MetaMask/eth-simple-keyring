@@ -198,9 +198,10 @@ describe('simple-keyring', () => {
   describe('#signTypedData', () => {
     const address = '0x29c76e6ad8f28bb1004902578fb108c507be341b'
     const privKeyHex = '4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0'
-  
+    const expectedSig = '0x49e75d475d767de7fcc67f521e0d86590723d872e6111e51c393e8c1e2f21d032dfaf5833af158915f035db6af4f37bf2d5d29781cd81f28a44c5cb4b9d241531b'
+
     const privKey = Buffer.from(privKeyHex, 'hex')
-  
+
     const typedData = [
       {
         type: 'string',
@@ -215,6 +216,7 @@ describe('simple-keyring', () => {
       const sig = await keyring.signTypedData(address, typedData)
       const signedParams = Object.create(msgParams)
       signedParams.sig = sig;
+      assert.equal(sig, expectedSig, 'produced correct signature.')
       const restored = sigUtil.recoverTypedSignatureLegacy(signedParams)
       assert.equal(restored, address, 'recovered address')
     })
@@ -223,9 +225,10 @@ describe('simple-keyring', () => {
   describe('#signTypedData_v1', () => {
     const address = '0x29c76e6ad8f28bb1004902578fb108c507be341b'
     const privKeyHex = '4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0'
-  
+    const expectedSig = '0x49e75d475d767de7fcc67f521e0d86590723d872e6111e51c393e8c1e2f21d032dfaf5833af158915f035db6af4f37bf2d5d29781cd81f28a44c5cb4b9d241531b'
+
     const privKey = Buffer.from(privKeyHex, 'hex')
-  
+
     const typedData = [
       {
         type: 'string',
@@ -240,6 +243,7 @@ describe('simple-keyring', () => {
       const sig = await keyring.signTypedData_v1(address, typedData)
       const signedParams = Object.create(msgParams)
       signedParams.sig = sig;
+      assert.equal(sig, expectedSig, 'produced correct signature.')
       const restored = sigUtil.recoverTypedSignatureLegacy(signedParams)
       assert.equal(restored, address, 'recovered address')
     })
@@ -266,6 +270,25 @@ describe('simple-keyring', () => {
     })
   })
 
+  describe('#signTypedData_v3 signature verification', () => {
+    const privKeyHex = 'c85ef7d79691fe79573b1a7064c19c1a9819ebdbd1faaab1a8ec92344438aaf4'
+    const expectedSig = '0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c'
+
+    it('returns the expected value', async () => {
+      const typedData = {"data":{"types":{"EIP712Domain":[{"name":"name","type":"string"},{"name":"version","type":"string"},{"name":"chainId","type":"uint256"},{"name":"verifyingContract","type":"address"}],"Person":[{"name":"name","type":"string"},{"name":"wallet","type":"address"}],"Mail":[{"name":"from","type":"Person"},{"name":"to","type":"Person"},{"name":"contents","type":"string"}]},"primaryType":"Mail","domain":{"name":"Ether Mail","version":"1","chainId":1,"verifyingContract":"0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"},"message":{"from":{"name":"Cow","wallet":"0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"},"to":{"name":"Bob","wallet":"0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"},"contents":"Hello, Bob!"}}}
+
+      await keyring.deserialize([privKeyHex])
+      const addresses = await keyring.getAccounts()
+      const address = addresses[0]
+      const sig = await keyring.signTypedData_v3(address, typedData.data)
+      assert.equal(sig, expectedSig, 'verified signature')
+      const signedData = Object.create(typedData)
+      signedData.sig = sig
+      const restored = sigUtil.recoverTypedSignature(signedData)
+      assert.equal(restored, address, 'recovered address')
+    })
+  })
+
   describe('#signTypedData_v4', () => {
     const address = '0x29c76e6ad8f28bb1004902578fb108c507be341b'
     const privKeyHex = '0x4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0'
@@ -286,6 +309,29 @@ describe('simple-keyring', () => {
       assert.equal(restored, address, 'recovered address')
     })
   })
+
+
+  describe('#signTypedData_v4 signature verification', () => {
+    const privKeyHex = 'c85ef7d79691fe79573b1a7064c19c1a9819ebdbd1faaab1a8ec92344438aaf4'
+    const expectedSig = '0x65cbd956f2fae28a601bebc9b906cea0191744bd4c4247bcd27cd08f8eb6b71c78efdf7a31dc9abee78f492292721f362d296cf86b4538e07b51303b67f749061b'
+
+    it('returns the expected value', async () => {
+      const typedData = {"data":{"types":{"EIP712Domain":[{"name":"name","type":"string"},{"name":"version","type":"string"},{"name":"chainId","type":"uint256"},{"name":"verifyingContract","type":"address"}],"Person":[{"name":"name","type":"string"},{"name":"wallets","type":"address[]"}],"Mail":[{"name":"from","type":"Person"},{"name":"to","type":"Person[]"},{"name":"contents","type":"string"}],"Group":[{"name":"name","type":"string"},{"name":"members","type":"Person[]"}]},"domain":{"name":"Ether Mail","version":"1","chainId":1,"verifyingContract":"0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"},"primaryType":"Mail","message":{"from":{"name":"Cow","wallets":["0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826","0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF"]},"to":[{"name":"Bob","wallets":["0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB","0xB0BdaBea57B0BDABeA57b0bdABEA57b0BDabEa57","0xB0B0b0b0b0b0B000000000000000000000000000"]}],"contents":"Hello, Bob!"}}}
+
+      await keyring.deserialize([privKeyHex])
+
+      const addresses = await keyring.getAccounts()
+      const address = addresses[0]
+
+      const sig = await keyring.signTypedData_v4(address, typedData.data)
+      assert.equal(sig, expectedSig, 'verified signature')
+      const signedData = Object.create(typedData)
+      signedData.sig = sig
+      const restored = sigUtil.recoverTypedSignature(signedData)
+      assert.equal(restored, address, 'recovered address')
+    })
+  })
+
 
   describe('getAppKeyAddress', function () {
     it('should return a public address custom to the provided app key origin', async function () {

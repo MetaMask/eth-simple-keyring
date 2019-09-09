@@ -50,16 +50,16 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // tx is an instance of the ethereumjs-transaction class.
-  signTransaction (address, tx) {
-    const wallet = this._getWalletForAccount(address)
+  signTransaction (address, tx, opts = {}) {
+    const wallet = this._getWalletForAccount(address, opts)
     var privKey = wallet.getPrivateKey()
     tx.sign(privKey)
     return Promise.resolve(tx)
   }
 
   // For eth_sign, we need to sign arbitrary data:
-  signMessage (withAccount, data) {
-    const wallet = this._getWalletForAccount(withAccount)
+  signMessage (withAccount, data, opts = {}) {
+    const wallet = this._getWalletForAccount(withAccount, opts)
     const message = ethUtil.stripHexPrefix(data)
     var privKey = wallet.getPrivateKey()
     var msgSig = ethUtil.ecsign(new Buffer(message, 'hex'), privKey)
@@ -68,8 +68,8 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // For personal_sign, we need to prefix the message:
-  signPersonalMessage (withAccount, msgHex) {
-    const wallet = this._getWalletForAccount(withAccount)
+  signPersonalMessage (withAccount, msgHex, opts = {}) {
+    const wallet = this._getWalletForAccount(withAccount, opts)
     const privKey = ethUtil.stripHexPrefix(wallet.getPrivateKey())
     const privKeyBuffer = new Buffer(privKey, 'hex')
     const sig = sigUtil.personalSign(privKeyBuffer, { data: msgHex })
@@ -86,11 +86,26 @@ class SimpleKeyring extends EventEmitter {
   }
   
   // personal_signTypedData, signs data along with the schema
-  signTypedData (withAccount, typedData) {
-    const wallet = this._getWalletForAccount(withAccount)
+  signTypedData (withAccount, typedData, opts = {}) {
+    const wallet = this._getWalletForAccount(withAccount, opts)
     const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
     const sig = sigUtil.signTypedData(privKey, { data: typedData })
     return Promise.resolve(sig)
+  }
+
+  // returns an address specific to an app
+  getAppKeyAddress (address, origin) {
+    return new Promise((resolve, reject) => {
+      try {
+        const wallet = this._getWalletForAccount(address, {
+          withAppKeyOrigin: origin,
+        })
+        const appKeyAddress = sigUtil.normalize(wallet.getAddress().toString('hex'))
+        return resolve(appKeyAddress)
+      } catch (e) {
+        return reject(e)
+      }
+    })
   }
 
   // exportAccount should return a hex-encoded private key:
@@ -108,10 +123,19 @@ class SimpleKeyring extends EventEmitter {
 
   /* PRIVATE METHODS */
 
-  _getWalletForAccount (account) {
+  _getWalletForAccount (account, opts = {}) {
     const address = sigUtil.normalize(account)
     let wallet = this.wallets.find(w => ethUtil.bufferToHex(w.getAddress()) === address)
     if (!wallet) throw new Error('Simple Keyring - Unable to find matching address.')
+
+    if (opts.withAppKeyOrigin) {
+      const privKey = wallet.getPrivateKey()
+      const appKeyOriginBuffer = Buffer.from(opts.withAppKeyOrigin, 'utf8')
+      const appKeyBuffer = Buffer.concat([privKey, appKeyOriginBuffer])
+      const appKeyPrivKey = ethUtil.keccak(appKeyBuffer, 256)
+      wallet = Wallet.fromPrivateKey(appKeyPrivKey)
+    }
+
     return wallet
   }
 

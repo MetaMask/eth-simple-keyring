@@ -1,6 +1,6 @@
 {
   "name": "eth-simple-keyring",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "A simple standard interface for a series of Ethereum private keys.",
   "main": "index.js",
   "scripts": {

@@ -118,6 +118,13 @@ class SimpleKeyring extends EventEmitter {
     return Promise.resolve(sig)
   }
 
+  // get public key for nacl
+  getEncryptionPublicKey (withAccount, opts = {}) {
+    const privKey = this.getPrivateKeyFor(withAccount, opts);
+    const publicKey = sigUtil.getEncryptionPublicKey(privKey)
+    return Promise.resolve(publicKey)
+  }
+  
   getPrivateKeyFor (address, opts = {}) {
     if (!address) {
       throw new Error('Must specify address.');

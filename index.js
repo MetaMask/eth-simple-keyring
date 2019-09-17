@@ -83,6 +83,15 @@ class SimpleKeyring extends EventEmitter {
     return Promise.resolve(sig)
   }
 
+  // For eth_decryptMessage:
+  decryptMessage (withAccount, encryptedData) {
+    const wallet = this._getWalletForAccount(withAccount)
+    const privKey = ethUtil.stripHexPrefix(wallet.getPrivateKey())
+    const privKeyBuffer = new Buffer(privKey, 'hex')
+    const sig = sigUtil.decrypt(encryptedData, privKey)
+    return Promise.resolve(sig)
+  }
+  
   // personal_signTypedData, signs data along with the schema
   signTypedData (withAccount, typedData, opts = {}) {
     return this.signTypedData_v1(withAccount, typedData, opts);

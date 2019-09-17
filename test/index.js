@@ -309,6 +309,20 @@ describe('simple-keyring', () => {
       assert.equal(restored, address, 'recovered address')
     })
   })
+  
+  describe('#decryptMessage', () => {
+    it('returns the expected value', async () => {
+      const address = '0xbe93f9bacbcffc8ee6663f2647917ed7a20a57bb'
+      const privateKey = new Buffer('6969696969696969696969696969696969696969696969696969696969696969', 'hex')
+      const privKeyHex = ethUtil.bufferToHex(privateKey)
+      const message = 'Hello world!'
+	  const encryptedMessage = sigUtil.encrypt(sigUtil.getEncryptionPublicKey(privateKey), {'data': message}, 'x25519-xsalsa20-poly1305')
+	  
+	  await keyring.deserialize([privKeyHex])
+      const decryptedMessage = await keyring.decryptMessage(address, encryptedMessage)
+      assert.equal(message, decryptedMessage, 'signature matches')
+    })
+  })
 
 
   describe('#signTypedData_v4 signature verification', () => {

@@ -91,7 +91,7 @@ class SimpleKeyring extends EventEmitter {
     const sig = sigUtil.decrypt(encryptedData, privKey)
     return Promise.resolve(sig)
   }
-  
+
   // personal_signTypedData, signs data along with the schema
   signTypedData (withAccount, typedData, opts = {}) {
     return this.signTypedData_v1(withAccount, typedData, opts);
@@ -143,8 +143,8 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // exportAccount should return a hex-encoded private key:
-  exportAccount (address) {
-    const wallet = this._getWalletForAccount(address)
+  exportAccount (address, opts = {}) {
+    const wallet = this._getWalletForAccount(address, opts)
     return Promise.resolve(wallet.getPrivateKey().toString('hex'))
   }
 

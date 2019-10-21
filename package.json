@@ -1,6 +1,6 @@
 {
   "name": "eth-simple-keyring",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "A simple standard interface for a series of Ethereum private keys.",
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/MetaMask/eth-simple-keyring#readme",
   "dependencies": {
-    "eth-sig-util": "^2.4.3",
+    "eth-sig-util": "^2.5.0",
     "ethereumjs-abi": "^0.6.5",
     "ethereumjs-util": "^5.1.1",
     "ethereumjs-wallet": "^0.6.0",

@@ -247,6 +247,16 @@ describe('simple-keyring', () => {
       const restored = sigUtil.recoverTypedSignatureLegacy(signedParams)
       assert.equal(restored, address, 'recovered address')
     })
+
+    it('works via version paramter', async () => {
+      await keyring.deserialize([privKeyHex])
+      const sig = await keyring.signTypedData(address, typedData)
+      const signedParams = Object.create(msgParams)
+      signedParams.sig = sig;
+      assert.equal(sig, expectedSig, 'produced correct signature.')
+      const restored = sigUtil.recoverTypedSignatureLegacy(signedParams)
+      assert.equal(restored, address, 'recovered address')
+    })
   })
 
   describe('#signTypedData_v3', () => {
@@ -265,6 +275,22 @@ describe('simple-keyring', () => {
 
       await keyring.deserialize([privKeyHex])
       const sig = await keyring.signTypedData_v3(address, typedData)
+      const restored = sigUtil.recoverTypedSignature({ data: typedData, sig: sig })
+      assert.equal(restored, address, 'recovered address')
+    })
+
+    it('works via the version parameter', async () => {
+      const typedData = {
+        types: {
+          EIP712Domain: []
+        },
+        domain: {},
+        primaryType: 'EIP712Domain',
+        message: {}
+      }
+
+      await keyring.deserialize([privKeyHex])
+      const sig = await keyring.signTypedData(address, typedData, { version: 'V3' })
       const restored = sigUtil.recoverTypedSignature({ data: typedData, sig: sig })
       assert.equal(restored, address, 'recovered address')
     })
@@ -309,7 +335,7 @@ describe('simple-keyring', () => {
       assert.equal(restored, address, 'recovered address')
     })
   })
-  
+
   describe('#decryptMessage', () => {
     it('returns the expected value', async () => {
       const address = '0xbe93f9bacbcffc8ee6663f2647917ed7a20a57bb'
@@ -317,7 +343,7 @@ describe('simple-keyring', () => {
       const privKeyHex = ethUtil.bufferToHex(privateKey)
       const message = 'Hello world!'
 	  const encryptedMessage = sigUtil.encrypt(sigUtil.getEncryptionPublicKey(privateKey), {'data': message}, 'x25519-xsalsa20-poly1305')
-	  
+
 	  await keyring.deserialize([privKeyHex])
       const decryptedMessage = await keyring.decryptMessage(address, encryptedMessage)
       assert.equal(message, decryptedMessage, 'signature matches')

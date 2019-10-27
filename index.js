@@ -91,10 +91,19 @@ class SimpleKeyring extends EventEmitter {
     const sig = sigUtil.decrypt(encryptedData, privKey)
     return Promise.resolve(sig)
   }
-  
+
   // personal_signTypedData, signs data along with the schema
-  signTypedData (withAccount, typedData, opts = {}) {
-    return this.signTypedData_v1(withAccount, typedData, opts);
+  signTypedData (withAccount, typedData, opts = { version: 'V1' }) {
+    switch (opts.version) {
+      case 'V1':
+        return this.signTypedData_v1(withAccount, typedData, opts);
+      case 'V3':
+        return this.signTypedData_v3(withAccount, typedData, opts);
+      case 'V4':
+        return this.signTypedData_v4(withAccount, typedData, opts);
+      default:
+        return this.signTypedData_v1(withAccount, typedData, opts);
+    }
   }
 
   // personal_signTypedData, signs data along with the schema
@@ -150,8 +159,8 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // exportAccount should return a hex-encoded private key:
-  exportAccount (address) {
-    const wallet = this._getWalletForAccount(address)
+  exportAccount (address, opts = {}) {
+    const wallet = this._getWalletForAccount(address, opts)
     return Promise.resolve(wallet.getPrivateKey().toString('hex'))
   }
 

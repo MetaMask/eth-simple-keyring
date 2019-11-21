@@ -24,7 +24,7 @@
     "eth-sig-util": "^2.5.0",
     "ethereumjs-abi": "^0.6.5",
     "ethereumjs-util": "^5.1.1",
-    "ethereumjs-wallet": "^0.6.0",
+    "randombytes": "^2.0.6",
     "events": "^1.1.1",
     "xtend": "^4.0.1"
   },

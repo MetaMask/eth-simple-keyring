@@ -1,5 +1,5 @@
 const EventEmitter = require('events').EventEmitter
-const Wallet = require('ethereumjs-wallet')
+const Wallet = require('./eth-wallet.js')
 const ethUtil = require('ethereumjs-util')
 const type = 'Simple Key Pair'
 const sigUtil = require('eth-sig-util')

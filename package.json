@@ -29,9 +29,8 @@
     "xtend": "^4.0.1"
   },
   "devDependencies": {
-    "ethereumjs-tx": "^2.1.0",
-    "extend": "^3.0.0",
     "chai": "^4.1.2",
+    "ethereumjs-tx": "^2.1.0",
     "mocha": "^5.2.0"
   }
 }

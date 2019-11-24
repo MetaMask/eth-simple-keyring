@@ -93,6 +93,44 @@ class SimpleKeyring extends EventEmitter {
     return Promise.resolve(sig)
   }
 
+  // personal_signTypedData, signs data along with the schema
+  signTypedData_v4 (withAccount, typedData, opts = {}) {
+    const privKey = this.getPrivateKeyFor(withAccount, opts);
+    const sig = sigUtil.signTypedData_v4(privKey, { data: typedData })
+    return Promise.resolve(sig)
+  }
+
+  // get public key for nacl
+  getEncryptionPublicKey (withAccount, opts = {}) {
+    const privKey = this.getPrivateKeyFor(withAccount, opts);
+    const publicKey = sigUtil.getEncryptionPublicKey(privKey)
+    return Promise.resolve(publicKey)
+  }
+  
+  getPrivateKeyFor (address, opts = {}) {
+    if (!address) {
+      throw new Error('Must specify address.');
+    }
+    const wallet = this._getWalletForAccount(address, opts)
+    const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
+    return privKey;
+  }
+
+  // returns an address specific to an app
+  getAppKeyAddress (address, origin) {
+    return new Promise((resolve, reject) => {
+      try {
+        const wallet = this._getWalletForAccount(address, {
+          withAppKeyOrigin: origin,
+        })
+        const appKeyAddress = sigUtil.normalize(wallet.getAddress().toString('hex'))
+        return resolve(appKeyAddress)
+      } catch (e) {
+        return reject(e)
+      }
+    })
+  }
+
   // exportAccount should return a hex-encoded private key:
   exportAccount (address) {
     const wallet = this._getWalletForAccount(address)

@@ -225,11 +225,128 @@ describe('simple-keyring', () => {
       const privateKey = new Buffer('6969696969696969696969696969696969696969696969696969696969696969', 'hex')
       const privKeyHex = ethUtil.bufferToHex(privateKey)
       const message = 'Hello world!'
-	  const encryptedMessage = sigUtil.encrypt(sigUtil.getEncryptionPublicKey(privateKey), {'data': message}, 'x25519-xsalsa20-poly1305')
-	  
-	  await keyring.deserialize([privKeyHex])
+      const encryptedMessage = sigUtil.encrypt(sigUtil.getEncryptionPublicKey(privateKey), {'data': message}, 'x25519-xsalsa20-poly1305')
+
+      await keyring.deserialize([privKeyHex])
       const decryptedMessage = await keyring.decryptMessage(address, encryptedMessage)
       assert.equal(message, decryptedMessage, 'signature matches')
+    })
+  })
+
+  describe('#encryptionPublicKey', () => {
+    it('returns the expected value', async () => {
+      const address = '0xbe93f9bacbcffc8ee6663f2647917ed7a20a57bb'
+      const privateKey = new Buffer('6969696969696969696969696969696969696969696969696969696969696969', 'hex')
+      const publicKey = 'GxuMqoE2oHsZzcQtv/WMNB3gCH2P6uzynuwO1P0MM1U='
+      const privKeyHex = ethUtil.bufferToHex(privateKey)
+      await keyring.deserialize([privKeyHex])
+      const encryptionPublicKey = await keyring.getEncryptionPublicKey(address, privateKey)
+      assert.equal(publicKey, encryptionPublicKey, 'public keys matches')
+    })
+  })
+  
+  describe('#signTypedData_v4 signature verification', () => {
+    const privKeyHex = 'c85ef7d79691fe79573b1a7064c19c1a9819ebdbd1faaab1a8ec92344438aaf4'
+    const expectedSig = '0x65cbd956f2fae28a601bebc9b906cea0191744bd4c4247bcd27cd08f8eb6b71c78efdf7a31dc9abee78f492292721f362d296cf86b4538e07b51303b67f749061b'
+
+    it('returns the expected value', async () => {
+      const typedData = {"data":{"types":{"EIP712Domain":[{"name":"name","type":"string"},{"name":"version","type":"string"},{"name":"chainId","type":"uint256"},{"name":"verifyingContract","type":"address"}],"Person":[{"name":"name","type":"string"},{"name":"wallets","type":"address[]"}],"Mail":[{"name":"from","type":"Person"},{"name":"to","type":"Person[]"},{"name":"contents","type":"string"}],"Group":[{"name":"name","type":"string"},{"name":"members","type":"Person[]"}]},"domain":{"name":"Ether Mail","version":"1","chainId":1,"verifyingContract":"0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"},"primaryType":"Mail","message":{"from":{"name":"Cow","wallets":["0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826","0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF"]},"to":[{"name":"Bob","wallets":["0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB","0xB0BdaBea57B0BDABeA57b0bdABEA57b0BDabEa57","0xB0B0b0b0b0b0B000000000000000000000000000"]}],"contents":"Hello, Bob!"}}}
+
+      await keyring.deserialize([privKeyHex])
+
+      const addresses = await keyring.getAccounts()
+      const address = addresses[0]
+
+      const sig = await keyring.signTypedData_v4(address, typedData.data)
+      assert.equal(sig, expectedSig, 'verified signature')
+      const signedData = Object.create(typedData)
+      signedData.sig = sig
+      const restored = sigUtil.recoverTypedSignature_v4(signedData)
+      assert.equal(restored, address, 'recovered address')
+    })
+  })
+
+
+  describe('getAppKeyAddress', function () {
+    it('should return a public address custom to the provided app key origin', async function () {
+      const address = testAccount.address
+      const keyring = new SimpleKeyring([testAccount.key])
+
+      const appKeyAddress = await keyring.getAppKeyAddress(address, 'someapp.origin.io')
+
+      assert.notEqual(address, appKeyAddress)
+      assert(ethUtil.isValidAddress(appKeyAddress))
+    })
+
+    it('should return different addresses when provided different app key origins', async function () {
+      const address = testAccount.address
+      const keyring = new SimpleKeyring([testAccount.key])
+
+      const appKeyAddress1 = await keyring.getAppKeyAddress(address, 'someapp.origin.io')
+
+      assert(ethUtil.isValidAddress(appKeyAddress1))
+
+      const appKeyAddress2 = await keyring.getAppKeyAddress(address, 'anotherapp.origin.io')
+
+      assert(ethUtil.isValidAddress(appKeyAddress2))
+
+      assert.notEqual(appKeyAddress1, appKeyAddress2)
+    })
+
+    it('should return the same address when called multiple times with the same params', async function () {
+      const address = testAccount.address
+      const keyring = new SimpleKeyring([testAccount.key])
+
+      const appKeyAddress1 = await keyring.getAppKeyAddress(address, 'someapp.origin.io')
+
+      assert(ethUtil.isValidAddress(appKeyAddress1))
+
+      const appKeyAddress2 = await keyring.getAppKeyAddress(address, 'someapp.origin.io')
+
+      assert(ethUtil.isValidAddress(appKeyAddress2))
+
+      assert.equal(appKeyAddress1, appKeyAddress2)
+    })
+  })
+
+  describe('signing methods withAppKeyOrigin option', function () {
+    it('should signPersonalMessage with the expected key when passed a withAppKeyOrigin', async function () {
+      const address = testAccount.address
+      const message = '0x68656c6c6f20776f726c64'
+
+      const privateKeyHex = '4fbe006f0e9c2374f53eb1aef1b6970d20206c61ea05ad9591ef42176eb842c0'
+      const privateKeyBuffer = new Buffer(privateKeyHex, 'hex')
+      const expectedSig = sigUtil.personalSign(privateKeyBuffer, { data: message })
+
+      const keyring = new SimpleKeyring([testAccount.key])
+      const sig = await keyring.signPersonalMessage(address, message, {
+        withAppKeyOrigin: 'someapp.origin.io',
+      })
+
+      assert.equal(expectedSig, sig, 'sign with app key generated private key')
+    })
+
+    it('should signTypedData_v3 with the expected key when passed a withAppKeyOrigin', async function () {
+      const address = testAccount.address
+      const typedData = {
+        types: {
+          EIP712Domain: []
+        },
+        domain: {},
+        primaryType: 'EIP712Domain',
+        message: {}
+      }
+
+      const privateKeyHex = '4fbe006f0e9c2374f53eb1aef1b6970d20206c61ea05ad9591ef42176eb842c0'
+      const privateKeyBuffer = new Buffer(privateKeyHex, 'hex')
+      const expectedSig = sigUtil.signTypedData(privateKeyBuffer, { data: typedData })
+
+      const keyring = new SimpleKeyring([testAccount.key])
+      const sig = await keyring.signTypedData_v3(address, typedData, {
+        withAppKeyOrigin: 'someapp.origin.io',
+      })
+
+      assert.equal(expectedSig, sig, 'sign with app key generated private key')
     })
   })
 })

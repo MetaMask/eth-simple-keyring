@@ -15,116 +15,99 @@ class SimpleKeyring extends EventEmitter {
     this.deserialize(opts)
   }
 
-  serialize () {
-    return Promise.resolve(this.wallets.map(w => w.getPrivateKey().toString('hex')))
+  async serialize () {
+    return this.wallets.map(w => w.getPrivateKey().toString('hex'))
   }
 
-  deserialize (privateKeys = []) {
-    return new Promise((resolve, reject) => {
-      try {
-        this.wallets = privateKeys.map((privateKey) => {
-          const stripped = ethUtil.stripHexPrefix(privateKey)
-          const buffer = new Buffer(stripped, 'hex')
-          const wallet = Wallet.fromPrivateKey(buffer)
-          return wallet
-        })
-      } catch (e) {
-        reject(e)
-      }
-      resolve()
+  async deserialize (privateKeys = []) {
+    this.wallets = privateKeys.map((privateKey) => {
+      const stripped = ethUtil.stripHexPrefix(privateKey)
+      const buffer = new Buffer(stripped, 'hex')
+      const wallet = Wallet.fromPrivateKey(buffer)
+      return wallet
     })
   }
 
-  addAccounts (n = 1) {
+  async addAccounts (n = 1) {
     var newWallets = []
     for (var i = 0; i < n; i++) {
       newWallets.push(Wallet.generate())
     }
     this.wallets = this.wallets.concat(newWallets)
-    const hexWallets = newWallets.map(w => ethUtil.bufferToHex(w.getAddress()))
-    return Promise.resolve(hexWallets)
+    return newWallets.map(w => ethUtil.bufferToHex(w.getAddress()))
   }
 
-  getAccounts () {
-    return Promise.resolve(this.wallets.map(w => ethUtil.bufferToHex(w.getAddress())))
+  async getAccounts () {
+    return this.wallets.map(w => ethUtil.bufferToHex(w.getAddress()))
   }
 
   // tx is an instance of the ethereumjs-transaction class.
-  signTransaction (address, tx) {
+  async signTransaction (address, tx) {
     const privKey = this.getPrivateKeyFor(address);
     tx.sign(privKey)
-    return Promise.resolve(tx)
+    return tx
   }
 
   // For eth_sign, we need to sign arbitrary data:
-  signMessage (address, data) {
+  async signMessage (address, data) {
     const message = ethUtil.stripHexPrefix(data)
     const privKey = this.getPrivateKeyFor(address);
     var msgSig = ethUtil.ecsign(new Buffer(message, 'hex'), privKey)
-    var rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
-    return Promise.resolve(rawMsgSig)
+    return ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
   }
 
   // For eth_sign, we need to sign transactions:
-  newGethSignMessage (withAccount, msgHex) {
+  async newGethSignMessage (withAccount, msgHex) {
     const privKey = this.getPrivateKeyFor(withAccount);
     const msgBuffer = ethUtil.toBuffer(msgHex)
     const msgHash = ethUtil.hashPersonalMessage(msgBuffer)
     const msgSig = ethUtil.ecsign(msgHash, privKey)
-    const rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
-    return Promise.resolve(rawMsgSig)
+    return ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
   }
 
   // For personal_sign, we need to prefix the message:
-  signPersonalMessage (address, msgHex) {
+  async signPersonalMessage (address, msgHex) {
     const privKey = this.getPrivateKeyFor(address);
     const privKeyBuffer = new Buffer(privKey, 'hex')
-    const sig = sigUtil.personalSign(privKeyBuffer, { data: msgHex })
-    return Promise.resolve(sig)
+    return sigUtil.personalSign(privKeyBuffer, { data: msgHex })
   }
 
   // For eth_decryptMessage:
-  decryptMessage (withAccount, encryptedData) {
+  async decryptMessage (withAccount, encryptedData) {
     const wallet = this._getWalletForAccount(withAccount)
     const privKey = ethUtil.stripHexPrefix(wallet.getPrivateKey())
-    const privKeyBuffer = new Buffer(privKey, 'hex')
-    const sig = sigUtil.decrypt(encryptedData, privKey)
-    return Promise.resolve(sig)
+    return sigUtil.decrypt(encryptedData, privKey)
   }
 
   // personal_signTypedData, signs data along with the schema
-  signTypedData (withAccount, typedData, opts = { version: 'V1' }) {
+  async signTypedData (withAccount, typedData, opts = { version: 'V1' }) {
     switch (opts.version) {
-      case 'V1':
-        return this.signTypedData_v1(withAccount, typedData, opts);
       case 'V3':
         return this.signTypedData_v3(withAccount, typedData, opts);
       case 'V4':
         return this.signTypedData_v4(withAccount, typedData, opts);
+      case 'V1':
       default:
         return this.signTypedData_v1(withAccount, typedData, opts);
     }
   }
 
   // personal_signTypedData, signs data along with the schema
-  signTypedData_v1 (withAccount, typedData) {
+  async signTypedData_v1 (withAccount, typedData) {
     const privKey = this.getPrivateKeyFor(withAccount);
-    const sig = sigUtil.signTypedDataLegacy(privKey, { data: typedData })
-    return Promise.resolve(sig)
+    return sigUtil.signTypedDataLegacy(privKey, { data: typedData })
   }
 
   // personal_signTypedData, signs data along with the schema
-  signTypedData_v3 (withAccount, typedData) {
+  async signTypedData_v3 (withAccount, typedData) {
     const privKey = this.getPrivateKeyFor(withAccount);
-    const sig = sigUtil.signTypedData(privKey, { data: typedData })
-    return Promise.resolve(sig)
+    return sigUtil.signTypedData(privKey, { data: typedData })
   }
 
   // personal_signTypedData, signs data along with the schema
-  signTypedData_v4 (withAccount, typedData) {
+  async signTypedData_v4 (withAccount, typedData) {
     const privKey = this.getPrivateKeyFor(withAccount);
-    const sig = sigUtil.signTypedData_v4(privKey, { data: typedData })
-    return Promise.resolve(sig)
+    return sigUtil.signTypedData_v4(privKey, { data: typedData })
   }
 
   getPrivateKeyFor (address) {
@@ -160,9 +143,9 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // exportAccount should return a hex-encoded private key:
-  exportAccount (address) {
+  async exportAccount (address) {
     const wallet = this._getWalletForAccount(address)
-    return Promise.resolve(wallet.getPrivateKey().toString('hex'))
+    return wallet.getPrivateKey().toString('hex')
   }
 
   async removeAccount (address) {

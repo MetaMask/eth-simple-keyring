@@ -43,7 +43,7 @@ class SimpleKeyring extends EventEmitter {
 
   // tx is an instance of the ethereumjs-transaction class.
   async signTransaction (address, tx) {
-    const privKey = this.getPrivateKeyFor(address);
+    const privKey = this._getPrivateKeyFor(address);
     tx.sign(privKey)
     return tx
   }
@@ -51,14 +51,14 @@ class SimpleKeyring extends EventEmitter {
   // For eth_sign, we need to sign arbitrary data:
   async signMessage (address, data) {
     const message = ethUtil.stripHexPrefix(data)
-    const privKey = this.getPrivateKeyFor(address);
+    const privKey = this._getPrivateKeyFor(address);
     var msgSig = ethUtil.ecsign(new Buffer(message, 'hex'), privKey)
     return ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
   }
 
   // For eth_sign, we need to sign transactions:
   async newGethSignMessage (withAccount, msgHex) {
-    const privKey = this.getPrivateKeyFor(withAccount);
+    const privKey = this._getPrivateKeyFor(withAccount);
     const msgBuffer = ethUtil.toBuffer(msgHex)
     const msgHash = ethUtil.hashPersonalMessage(msgBuffer)
     const msgSig = ethUtil.ecsign(msgHash, privKey)
@@ -67,7 +67,7 @@ class SimpleKeyring extends EventEmitter {
 
   // For personal_sign, we need to prefix the message:
   async signPersonalMessage (address, msgHex) {
-    const privKey = this.getPrivateKeyFor(address);
+    const privKey = this._getPrivateKeyFor(address);
     const privKeyBuffer = new Buffer(privKey, 'hex')
     return sigUtil.personalSign(privKeyBuffer, { data: msgHex })
   }
@@ -94,29 +94,20 @@ class SimpleKeyring extends EventEmitter {
 
   // personal_signTypedData, signs data along with the schema
   async signTypedData_v1 (withAccount, typedData) {
-    const privKey = this.getPrivateKeyFor(withAccount);
+    const privKey = this._getPrivateKeyFor(withAccount);
     return sigUtil.signTypedDataLegacy(privKey, { data: typedData })
   }
 
   // personal_signTypedData, signs data along with the schema
   async signTypedData_v3 (withAccount, typedData) {
-    const privKey = this.getPrivateKeyFor(withAccount);
+    const privKey = this._getPrivateKeyFor(withAccount);
     return sigUtil.signTypedData(privKey, { data: typedData })
   }
 
   // personal_signTypedData, signs data along with the schema
   async signTypedData_v4 (withAccount, typedData) {
-    const privKey = this.getPrivateKeyFor(withAccount);
+    const privKey = this._getPrivateKeyFor(withAccount);
     return sigUtil.signTypedData_v4(privKey, { data: typedData })
-  }
-
-  getPrivateKeyFor (address) {
-    if (!address) {
-      throw new Error('Must specify address.');
-    }
-    const wallet = this._getWalletForAccount(address)
-    const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
-    return privKey;
   }
 
   async getAppKey (address, origin) {
@@ -156,6 +147,15 @@ class SimpleKeyring extends EventEmitter {
   }
 
   /* PRIVATE METHODS */
+
+  _getPrivateKeyFor (address) {
+    if (!address) {
+      throw new Error('Must specify address.');
+    }
+    const wallet = this._getWalletForAccount(address)
+    const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
+    return privKey;
+  }
 
   _getWalletForAccount (account) {
     const address = sigUtil.normalize(account)

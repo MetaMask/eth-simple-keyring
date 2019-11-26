@@ -50,24 +50,24 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // tx is an instance of the ethereumjs-transaction class.
-  signTransaction (address, tx, opts = {}) {
-    const privKey = this.getPrivateKeyFor(address, opts);
+  signTransaction (address, tx) {
+    const privKey = this.getPrivateKeyFor(address);
     tx.sign(privKey)
     return Promise.resolve(tx)
   }
 
   // For eth_sign, we need to sign arbitrary data:
-  signMessage (address, data, opts = {}) {
+  signMessage (address, data) {
     const message = ethUtil.stripHexPrefix(data)
-    const privKey = this.getPrivateKeyFor(address, opts);
+    const privKey = this.getPrivateKeyFor(address);
     var msgSig = ethUtil.ecsign(new Buffer(message, 'hex'), privKey)
     var rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
     return Promise.resolve(rawMsgSig)
   }
 
   // For eth_sign, we need to sign transactions:
-  newGethSignMessage (withAccount, msgHex, opts = {}) {
-    const privKey = this.getPrivateKeyFor(withAccount, opts);
+  newGethSignMessage (withAccount, msgHex) {
+    const privKey = this.getPrivateKeyFor(withAccount);
     const msgBuffer = ethUtil.toBuffer(msgHex)
     const msgHash = ethUtil.hashPersonalMessage(msgBuffer)
     const msgSig = ethUtil.ecsign(msgHash, privKey)
@@ -76,8 +76,8 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // For personal_sign, we need to prefix the message:
-  signPersonalMessage (address, msgHex, opts = {}) {
-    const privKey = this.getPrivateKeyFor(address, opts);
+  signPersonalMessage (address, msgHex) {
+    const privKey = this.getPrivateKeyFor(address);
     const privKeyBuffer = new Buffer(privKey, 'hex')
     const sig = sigUtil.personalSign(privKeyBuffer, { data: msgHex })
     return Promise.resolve(sig)
@@ -107,53 +107,60 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // personal_signTypedData, signs data along with the schema
-  signTypedData_v1 (withAccount, typedData, opts = {}) {
-    const privKey = this.getPrivateKeyFor(withAccount, opts);
+  signTypedData_v1 (withAccount, typedData) {
+    const privKey = this.getPrivateKeyFor(withAccount);
     const sig = sigUtil.signTypedDataLegacy(privKey, { data: typedData })
     return Promise.resolve(sig)
   }
 
   // personal_signTypedData, signs data along with the schema
-  signTypedData_v3 (withAccount, typedData, opts = {}) {
-    const privKey = this.getPrivateKeyFor(withAccount, opts);
+  signTypedData_v3 (withAccount, typedData) {
+    const privKey = this.getPrivateKeyFor(withAccount);
     const sig = sigUtil.signTypedData(privKey, { data: typedData })
     return Promise.resolve(sig)
   }
 
   // personal_signTypedData, signs data along with the schema
-  signTypedData_v4 (withAccount, typedData, opts = {}) {
-    const privKey = this.getPrivateKeyFor(withAccount, opts);
+  signTypedData_v4 (withAccount, typedData) {
+    const privKey = this.getPrivateKeyFor(withAccount);
     const sig = sigUtil.signTypedData_v4(privKey, { data: typedData })
     return Promise.resolve(sig)
   }
 
-  getPrivateKeyFor (address, opts = {}) {
+  getPrivateKeyFor (address) {
     if (!address) {
       throw new Error('Must specify address.');
     }
-    const wallet = this._getWalletForAccount(address, opts)
+    const wallet = this._getWalletForAccount(address)
     const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
     return privKey;
   }
 
-  // returns an address specific to an app
-  getAppKeyAddress (address, origin) {
-    return new Promise((resolve, reject) => {
-      try {
-        const wallet = this._getWalletForAccount(address, {
-          withAppKeyOrigin: origin,
-        })
-        const appKeyAddress = sigUtil.normalize(wallet.getAddress().toString('hex'))
-        return resolve(appKeyAddress)
-      } catch (e) {
-        return reject(e)
-      }
-    })
+  getAppKeyring (address, origin) {
+    if (
+      !origin ||
+      typeof origin !== 'string'
+    ) {
+      throw new Error(`'origin' must be a non-empty string`)
+    }
+
+    const wallet = this._getWalletForAccount(address)
+    const privKey = wallet.getPrivateKey()
+    const appKeyOriginBuffer = Buffer.from(origin, 'utf8')
+    const appKeyBuffer = Buffer.concat([privKey, appKeyOriginBuffer])
+    const appKeyPrivKey = ethUtil.keccak(appKeyBuffer, 256)
+    return new SimpleKeyring([appKeyPrivKey.toString('hex')])
+  }
+
+  async getAppKeyAddress (address, origin) {
+    const keyring = this.getAppKeyring(address, origin)
+    const accounts = await keyring.getAccounts()
+    return accounts[0]
   }
 
   // exportAccount should return a hex-encoded private key:
-  exportAccount (address, opts = {}) {
-    const wallet = this._getWalletForAccount(address, opts)
+  exportAccount (address) {
+    const wallet = this._getWalletForAccount(address)
     return Promise.resolve(wallet.getPrivateKey().toString('hex'))
   }
 
@@ -166,19 +173,10 @@ class SimpleKeyring extends EventEmitter {
 
   /* PRIVATE METHODS */
 
-  _getWalletForAccount (account, opts = {}) {
+  _getWalletForAccount (account) {
     const address = sigUtil.normalize(account)
     let wallet = this.wallets.find(w => ethUtil.bufferToHex(w.getAddress()) === address)
     if (!wallet) throw new Error('Simple Keyring - Unable to find matching address.')
-
-    if (opts.withAppKeyOrigin) {
-      const privKey = wallet.getPrivateKey()
-      const appKeyOriginBuffer = Buffer.from(opts.withAppKeyOrigin, 'utf8')
-      const appKeyBuffer = Buffer.concat([privKey, appKeyOriginBuffer])
-      const appKeyPrivKey = ethUtil.keccak(appKeyBuffer, 256)
-      wallet = Wallet.fromPrivateKey(appKeyPrivKey)
-    }
-
     return wallet
   }
 

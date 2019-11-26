@@ -415,44 +415,79 @@ describe('simple-keyring', () => {
     })
   })
 
-  describe('signing methods withAppKeyOrigin option', function () {
-    it('should signPersonalMessage with the expected key when passed a withAppKeyOrigin', async function () {
+  describe('getAppKeyring', function () {
+    it('should return a SimpleKeyring custom to the provided app origin', async function () {
       const address = testAccount.address
-      const message = '0x68656c6c6f20776f726c64'
-
-      const privateKeyHex = '4fbe006f0e9c2374f53eb1aef1b6970d20206c61ea05ad9591ef42176eb842c0'
-      const privateKeyBuffer = new Buffer(privateKeyHex, 'hex')
-      const expectedSig = sigUtil.personalSign(privateKeyBuffer, { data: message })
-
       const keyring = new SimpleKeyring([testAccount.key])
-      const sig = await keyring.signPersonalMessage(address, message, {
-        withAppKeyOrigin: 'someapp.origin.io',
-      })
 
-      assert.equal(expectedSig, sig, 'sign with app key generated private key')
+      const appKeyring = await keyring.getAppKeyring(address, 'someapp.origin.io')
+
+      assert(appKeyring instanceof SimpleKeyring)
+
+      const appKeyAddress = (await appKeyring.getAccounts())[0]
+
+      assert.notEqual(address, appKeyAddress)
+      assert(ethUtil.isValidAddress(appKeyAddress))
     })
 
-    it('should signTypedData_v3 with the expected key when passed a withAppKeyOrigin', async function () {
+    it('should return different keyrings when provided different app origins', async function () {
       const address = testAccount.address
-      const typedData = {
-        types: {
-          EIP712Domain: []
-        },
-        domain: {},
-        primaryType: 'EIP712Domain',
-        message: {}
-      }
-
-      const privateKeyHex = '4fbe006f0e9c2374f53eb1aef1b6970d20206c61ea05ad9591ef42176eb842c0'
-      const privateKeyBuffer = new Buffer(privateKeyHex, 'hex')
-      const expectedSig = sigUtil.signTypedData(privateKeyBuffer, { data: typedData })
-
       const keyring = new SimpleKeyring([testAccount.key])
-      const sig = await keyring.signTypedData_v3(address, typedData, {
-        withAppKeyOrigin: 'someapp.origin.io',
-      })
 
-      assert.equal(expectedSig, sig, 'sign with app key generated private key')
+      const appKeyring1 = await keyring.getAppKeyring(address, 'someapp.origin.io')
+      const appKeyAddress1 = (await appKeyring1.getAccounts())[0]
+
+      assert(ethUtil.isValidAddress(appKeyAddress1))
+
+      const appKeyring2 = await keyring.getAppKeyring(address, 'anotherapp.origin.io')
+      const appKeyAddress2 = (await appKeyring2.getAccounts())[0]
+
+      assert(ethUtil.isValidAddress(appKeyAddress2))
+
+      assert.notEqual(appKeyAddress1, appKeyAddress2)
+    })
+
+    it('should return the same keyring when called multiple times with the same params', async function () {
+      const address = testAccount.address
+      const keyring = new SimpleKeyring([testAccount.key])
+
+      const appKeyring1 = await keyring.getAppKeyring(address, 'someapp.origin.io')
+      const appKeyAddress1 = (await appKeyring1.getAccounts())[0]
+
+      assert(ethUtil.isValidAddress(appKeyAddress1))
+
+      const appKeyring2 = await keyring.getAppKeyring(address, 'someapp.origin.io')
+      const appKeyAddress2 = (await appKeyring2.getAccounts())[0]
+
+      assert(ethUtil.isValidAddress(appKeyAddress2))
+
+      assert.equal(appKeyAddress1, appKeyAddress2)
+    })
+
+    it('should throw error if the provided origin is not a string', async function () {
+      const address = testAccount.address
+      const keyring = new SimpleKeyring([testAccount.key])
+
+      try {
+        await keyring.getAppKeyring(address, [])
+      } catch (error) {
+        assert(error instanceof Error, 'Value thrown is not an error')
+        return
+      }
+      assert.fail('Should have thrown error')
+    })
+
+    it('should throw error if the provided origin is an empty string', async function () {
+      const address = testAccount.address
+      const keyring = new SimpleKeyring([testAccount.key])
+
+      try {
+        await keyring.getAppKeyring(address, '')
+      } catch (error) {
+        assert(error instanceof Error, 'Value thrown is not an error')
+        return
+      }
+      assert.fail('Should have thrown error')
     })
   })
 })

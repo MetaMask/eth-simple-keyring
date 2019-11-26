@@ -96,13 +96,13 @@ class SimpleKeyring extends EventEmitter {
   signTypedData (withAccount, typedData, opts = { version: 'V1' }) {
     switch (opts.version) {
       case 'V1':
-        return this.signTypedData_v1(withAccount, typedData, opts);
+        return this.signTypedData_v1(withAccount, typedData);
       case 'V3':
-        return this.signTypedData_v3(withAccount, typedData, opts);
+        return this.signTypedData_v3(withAccount, typedData);
       case 'V4':
-        return this.signTypedData_v4(withAccount, typedData, opts);
+        return this.signTypedData_v4(withAccount, typedData);
       default:
-        return this.signTypedData_v1(withAccount, typedData, opts);
+        return this.signTypedData_v1(withAccount, typedData);
     }
   }
 
@@ -136,7 +136,7 @@ class SimpleKeyring extends EventEmitter {
     return privKey;
   }
 
-  getAppKeyring (address, origin) {
+  async getAppKey (address, origin) {
     if (
       !origin ||
       typeof origin !== 'string'
@@ -149,13 +149,14 @@ class SimpleKeyring extends EventEmitter {
     const appKeyOriginBuffer = Buffer.from(origin, 'utf8')
     const appKeyBuffer = Buffer.concat([privKey, appKeyOriginBuffer])
     const appKeyPrivKey = ethUtil.keccak(appKeyBuffer, 256)
-    return new SimpleKeyring([appKeyPrivKey.toString('hex')])
+    return appKeyPrivKey
   }
 
   async getAppKeyAddress (address, origin) {
-    const keyring = this.getAppKeyring(address, origin)
-    const accounts = await keyring.getAccounts()
-    return accounts[0]
+    const key = await this.getAppKey(address, origin)
+    const wallet = Wallet.fromPrivateKey(key)
+    const appKeyAddress = wallet.getAddress()
+    return ethUtil.bufferToHex(appKeyAddress)
   }
 
   // exportAccount should return a hex-encoded private key:

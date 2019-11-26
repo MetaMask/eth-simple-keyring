@@ -415,61 +415,53 @@ describe('simple-keyring', () => {
     })
   })
 
-  describe('getAppKeyring', function () {
-    it('should return a SimpleKeyring custom to the provided app origin', async function () {
-      const address = testAccount.address
-      const keyring = new SimpleKeyring([testAccount.key])
+  describe('getAppKey', function () {
+    it('should return a private key custom to the provided app origin', async function () {
+      const { address, key } = testAccount
+      const keyring = new SimpleKeyring([key])
 
-      const appKeyring = await keyring.getAppKeyring(address, 'someapp.origin.io')
+      const appKey = await keyring.getAppKey(address, 'someapp.origin.io')
 
-      assert(appKeyring instanceof SimpleKeyring)
-
-      const appKeyAddress = (await appKeyring.getAccounts())[0]
-
-      assert.notEqual(address, appKeyAddress)
-      assert(ethUtil.isValidAddress(appKeyAddress))
+      assert.notEqual(key, appKey)
+      assert(ethUtil.isValidPrivate(appKey))
     })
 
     it('should return different keyrings when provided different app origins', async function () {
-      const address = testAccount.address
-      const keyring = new SimpleKeyring([testAccount.key])
+      const { address, key } = testAccount
+      const keyring = new SimpleKeyring([key])
 
-      const appKeyring1 = await keyring.getAppKeyring(address, 'someapp.origin.io')
-      const appKeyAddress1 = (await appKeyring1.getAccounts())[0]
+      const appKey1 = await keyring.getAppKey(address, 'someapp.origin.io')
 
-      assert(ethUtil.isValidAddress(appKeyAddress1))
+      assert(ethUtil.isValidPrivate(appKey1))
 
-      const appKeyring2 = await keyring.getAppKeyring(address, 'anotherapp.origin.io')
-      const appKeyAddress2 = (await appKeyring2.getAccounts())[0]
+      const appKey2 = await keyring.getAppKey(address, 'anotherapp.origin.io')
 
-      assert(ethUtil.isValidAddress(appKeyAddress2))
+      assert(ethUtil.isValidPrivate(appKey2))
 
-      assert.notEqual(appKeyAddress1, appKeyAddress2)
+      assert.notEqual(appKey1.toString('hex'), appKey2.toString('hex'))
     })
 
     it('should return the same keyring when called multiple times with the same params', async function () {
-      const address = testAccount.address
-      const keyring = new SimpleKeyring([testAccount.key])
+      const { address, key } = testAccount
+      const keyring = new SimpleKeyring([key])
 
-      const appKeyring1 = await keyring.getAppKeyring(address, 'someapp.origin.io')
-      const appKeyAddress1 = (await appKeyring1.getAccounts())[0]
+      const appKey1 = await keyring.getAppKey(address, 'someapp.origin.io')
 
-      assert(ethUtil.isValidAddress(appKeyAddress1))
+      assert(ethUtil.isValidPrivate(appKey1))
 
-      const appKeyring2 = await keyring.getAppKeyring(address, 'someapp.origin.io')
-      const appKeyAddress2 = (await appKeyring2.getAccounts())[0]
+      const appKey2 = await keyring.getAppKey(address, 'someapp.origin.io')
 
-      assert(ethUtil.isValidAddress(appKeyAddress2))
+      assert(ethUtil.isValidPrivate(appKey2))
 
-      assert.equal(appKeyAddress1, appKeyAddress2)
+      assert.equal(appKey1.toString('hex'), appKey2.toString('hex'))
     })
 
     it('should throw error if the provided origin is not a string', async function () {
-      const address = testAccount.address
-      const keyring = new SimpleKeyring([testAccount.key])
+      const { address, key } = testAccount
+      const keyring = new SimpleKeyring([key])
 
       try {
-        await keyring.getAppKeyring(address, [])
+        await keyring.getAppKey(address, [])
       } catch (error) {
         assert(error instanceof Error, 'Value thrown is not an error')
         return
@@ -478,11 +470,11 @@ describe('simple-keyring', () => {
     })
 
     it('should throw error if the provided origin is an empty string', async function () {
-      const address = testAccount.address
-      const keyring = new SimpleKeyring([testAccount.key])
+      const { address, key } = testAccount
+      const keyring = new SimpleKeyring([key])
 
       try {
-        await keyring.getAppKeyring(address, '')
+        await keyring.getAppKey(address, '')
       } catch (error) {
         assert(error instanceof Error, 'Value thrown is not an error')
         return

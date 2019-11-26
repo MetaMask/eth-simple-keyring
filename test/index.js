@@ -157,19 +157,23 @@ describe('simple-keyring', () => {
       it('should remove that account', async () => {
         await keyring.addAccounts()
         const addresses = await keyring.getAccounts()
-        keyring.removeAccount(addresses[0])
+        await keyring.removeAccount(addresses[0])
         const addressesAfterRemoval = await keyring.getAccounts()
         assert.equal(addressesAfterRemoval.length, addresses.length -1)
       })
     })
 
     describe('if the account does not exist', () => {
-      it('should throw an error', (done) => {
+      it('should throw an error', async () => {
         const unexistingAccount = '0x0000000000000000000000000000000000000000'
-        expect(_ => {
-           keyring.removeAccount(unexistingAccount)
-        }).to.throw(`Address ${unexistingAccount} not found in this keyring`)
-        done()
+
+        try {
+          await keyring.removeAccount(unexistingAccount)
+        } catch (error) {
+          assert(error.message, `Address ${unexistingAccount} not found in this keyring`)
+          return
+        }
+        assert.fail('Should have thrown error')
       })
     })
   })

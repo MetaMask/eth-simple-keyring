@@ -2,7 +2,8 @@
   "name": "eth-simple-keyring",
   "version": "4.0.0",
   "description": "A simple standard interface for a series of Ethereum private keys.",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "types": "./lib/index.d.ts",
   "scripts": {
     "test": "mocha"
   },
@@ -19,6 +20,9 @@
   "bugs": {
     "url": "https://github.com/MetaMask/eth-simple-keyring/issues"
   },
+  "files": [
+    "lib"
+  ],
   "homepage": "https://github.com/MetaMask/eth-simple-keyring#readme",
   "dependencies": {
     "eth-sig-util": "^2.5.0",
@@ -29,8 +33,10 @@
     "xtend": "^4.0.1"
   },
   "devDependencies": {
+    "@types/node": "^12.12.14",
     "chai": "^4.1.2",
     "ethereumjs-tx": "^2.1.0",
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "typescript": "^3.7.2"
   }
 }

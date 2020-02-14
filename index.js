@@ -154,6 +154,12 @@ class SimpleKeyring extends EventEmitter {
 
   // returns an address specific to an app
   getAppKeyAddress (address, origin) {
+    if (
+      !origin ||
+      typeof origin !== 'string'
+    ) {
+      throw new Error(`'origin' must be a non-empty string`)
+    }
     return new Promise((resolve, reject) => {
       try {
         const wallet = this._getWalletForAccount(address, {

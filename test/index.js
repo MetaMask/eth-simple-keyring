@@ -424,6 +424,32 @@ describe('simple-keyring', () => {
 
       assert.equal(appKeyAddress1, appKeyAddress2)
     })
+
+    it('should throw error if the provided origin is not a string', async function () {
+      const address = testAccount.address
+      const keyring = new SimpleKeyring([testAccount.key])
+
+      try {
+        await keyring.getAppKeyAddress(address, [])
+      } catch (error) {
+        assert(error instanceof Error, 'Value thrown is not an error')
+        return
+      }
+      assert.fail('Should have thrown error')
+    })
+
+    it('should throw error if the provided origin is an empty string', async function () {
+      const address = testAccount.address
+      const keyring = new SimpleKeyring([testAccount.key])
+
+      try {
+        await keyring.getAppKeyAddress(address, '')
+      } catch (error) {
+        assert(error instanceof Error, 'Value thrown is not an error')
+        return
+      }
+      assert.fail('Should have thrown error')
+    })
   })
 
   describe('signing methods withAppKeyOrigin option', function () {

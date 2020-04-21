@@ -92,6 +92,15 @@ class SimpleKeyring extends EventEmitter {
     return Promise.resolve(sig)
   }
 
+  // For eth_decryptMessage:
+  decryptMessage (withAccount, encryptedData) {
+    const wallet = this._getWalletForAccount(withAccount)
+    const privKey = ethUtil.stripHexPrefix(wallet.getPrivateKey())
+    const privKeyBuffer = new Buffer(privKey, 'hex')
+    const sig = sigUtil.decrypt(encryptedData, privKey)
+    return Promise.resolve(sig)
+  }
+  
   // personal_signTypedData, signs data along with the schema
   signTypedData (withAccount, typedData, opts = { version: 'V1' }) {
     switch (opts.version) {
@@ -127,6 +136,13 @@ class SimpleKeyring extends EventEmitter {
     return Promise.resolve(sig)
   }
 
+  // get public key for nacl
+  getEncryptionPublicKey (withAccount, opts = {}) {
+    const privKey = this.getPrivateKeyFor(withAccount, opts);
+    const publicKey = sigUtil.getEncryptionPublicKey(privKey)
+    return Promise.resolve(publicKey)
+  }
+  
   getPrivateKeyFor (address, opts = {}) {
     if (!address) {
       throw new Error('Must specify address.');
@@ -138,6 +154,12 @@ class SimpleKeyring extends EventEmitter {
 
   // returns an address specific to an app
   getAppKeyAddress (address, origin) {
+    if (
+      !origin ||
+      typeof origin !== 'string'
+    ) {
+      throw new Error(`'origin' must be a non-empty string`)
+    }
     return new Promise((resolve, reject) => {
       try {
         const wallet = this._getWalletForAccount(address, {

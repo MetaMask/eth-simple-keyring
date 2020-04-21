@@ -342,15 +342,26 @@ describe('simple-keyring', () => {
       const privateKey = new Buffer('6969696969696969696969696969696969696969696969696969696969696969', 'hex')
       const privKeyHex = ethUtil.bufferToHex(privateKey)
       const message = 'Hello world!'
-	  const encryptedMessage = sigUtil.encrypt(sigUtil.getEncryptionPublicKey(privateKey), {'data': message}, 'x25519-xsalsa20-poly1305')
+      const encryptedMessage = sigUtil.encrypt(sigUtil.getEncryptionPublicKey(privateKey), {'data': message}, 'x25519-xsalsa20-poly1305')
 
-	  await keyring.deserialize([privKeyHex])
+      await keyring.deserialize([privKeyHex])
       const decryptedMessage = await keyring.decryptMessage(address, encryptedMessage)
       assert.equal(message, decryptedMessage, 'signature matches')
     })
   })
 
-
+  describe('#encryptionPublicKey', () => {
+    it('returns the expected value', async () => {
+      const address = '0xbe93f9bacbcffc8ee6663f2647917ed7a20a57bb'
+      const privateKey = new Buffer('6969696969696969696969696969696969696969696969696969696969696969', 'hex')
+      const publicKey = 'GxuMqoE2oHsZzcQtv/WMNB3gCH2P6uzynuwO1P0MM1U='
+      const privKeyHex = ethUtil.bufferToHex(privateKey)
+      await keyring.deserialize([privKeyHex])
+      const encryptionPublicKey = await keyring.getEncryptionPublicKey(address, privateKey)
+      assert.equal(publicKey, encryptionPublicKey, 'public keys matches')
+    })
+  })
+  
   describe('#signTypedData_v4 signature verification', () => {
     const privKeyHex = 'c85ef7d79691fe79573b1a7064c19c1a9819ebdbd1faaab1a8ec92344438aaf4'
     const expectedSig = '0x65cbd956f2fae28a601bebc9b906cea0191744bd4c4247bcd27cd08f8eb6b71c78efdf7a31dc9abee78f492292721f362d296cf86b4538e07b51303b67f749061b'
@@ -412,6 +423,32 @@ describe('simple-keyring', () => {
       assert(ethUtil.isValidAddress(appKeyAddress2))
 
       assert.equal(appKeyAddress1, appKeyAddress2)
+    })
+
+    it('should throw error if the provided origin is not a string', async function () {
+      const address = testAccount.address
+      const keyring = new SimpleKeyring([testAccount.key])
+
+      try {
+        await keyring.getAppKeyAddress(address, [])
+      } catch (error) {
+        assert(error instanceof Error, 'Value thrown is not an error')
+        return
+      }
+      assert.fail('Should have thrown error')
+    })
+
+    it('should throw error if the provided origin is an empty string', async function () {
+      const address = testAccount.address
+      const keyring = new SimpleKeyring([testAccount.key])
+
+      try {
+        await keyring.getAppKeyAddress(address, '')
+      } catch (error) {
+        assert(error instanceof Error, 'Value thrown is not an error')
+        return
+      }
+      assert.fail('Should have thrown error')
     })
   })
 

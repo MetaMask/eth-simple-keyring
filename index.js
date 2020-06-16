@@ -7,8 +7,6 @@ const sigUtil = require('eth-sig-util')
 
 class SimpleKeyring extends EventEmitter {
 
-  /* PUBLIC METHODS */
-
   constructor (opts) {
     super()
     this.type = type
@@ -177,8 +175,9 @@ class SimpleKeyring extends EventEmitter {
     this.wallets = this.wallets.filter((w) => ethUtil.bufferToHex(w.getAddress()).toLowerCase() !== address.toLowerCase())
   }
 
-  /* PRIVATE METHODS */
-
+  /**
+   * @private
+   */
   _getWalletForAccount (account, opts = {}) {
     const address = sigUtil.normalize(account)
     let wallet = this.wallets.find((w) => ethUtil.bufferToHex(w.getAddress()) === address)

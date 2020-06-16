@@ -4,7 +4,9 @@
   "description": "A simple standard interface for a series of Ethereum private keys.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "lint": "eslint . --ext js,json",
+    "lint:fix": "eslint . --ext js,json --fix"
   },
   "repository": {
     "type": "git",
@@ -29,8 +31,12 @@
     "xtend": "^4.0.1"
   },
   "devDependencies": {
+    "@metamask/eslint-config": "^2.1.1",
     "chai": "^4.1.2",
+    "eslint": "^7.2.0",
+    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-json": "^2.1.1",
     "ethereumjs-tx": "^2.1.0",
-    "mocha": "^5.2.0"
+    "mocha": "^8.0.1"
   }
 }

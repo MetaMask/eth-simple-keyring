@@ -27,6 +27,5 @@ module.exports = {
         'signTypedData_v4',
       ],
     }],
-    // 'no-param-reassign': 'off',
   },
 }

@@ -3,6 +3,9 @@
   "version": "4.0.0",
   "description": "A simple standard interface for a series of Ethereum private keys.",
   "main": "index.js",
+  "files": [
+    "index.js"
+  ],
   "scripts": {
     "test": "mocha",
     "lint": "eslint . --ext js,json",

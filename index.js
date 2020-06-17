@@ -60,7 +60,7 @@ class SimpleKeyring extends EventEmitter {
     const message = ethUtil.stripHexPrefix(data)
     const privKey = this.getPrivateKeyFor(address, opts)
     const msgSig = ethUtil.ecsign(Buffer.from(message, 'hex'), privKey)
-    const rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
+    const rawMsgSig = sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s)
     return Promise.resolve(rawMsgSig)
   }
 
@@ -70,7 +70,7 @@ class SimpleKeyring extends EventEmitter {
     const msgBuffer = ethUtil.toBuffer(msgHex)
     const msgHash = ethUtil.hashPersonalMessage(msgBuffer)
     const msgSig = ethUtil.ecsign(msgHash, privKey)
-    const rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
+    const rawMsgSig = sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s)
     return Promise.resolve(rawMsgSig)
   }
 

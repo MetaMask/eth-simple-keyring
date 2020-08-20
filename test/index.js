@@ -381,7 +381,6 @@ describe('simple-keyring', () => {
     })
   })
 
-
   describe('getAppKeyAddress', function () {
     it('should return a public address custom to the provided app key origin', async function () {
       const { address } = testAccount

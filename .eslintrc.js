@@ -19,7 +19,6 @@ module.exports = {
     },
   }],
   rules: {
-    'no-plusplus': ['error', { 'allowForLoopAfterthoughts': true }],
     'camelcase': ['error', {
       'allow': [
         'signTypedData_v1',

@@ -4,6 +4,7 @@ const assert = require('assert')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
 const { Transaction: EthereumTx } = require('ethereumjs-tx')
+const { TransactionFactory } = require('@ethereumjs/tx')
 const { expect } = require('chai')
 const SimpleKeyring = require('..')
 
@@ -78,6 +79,23 @@ describe('simple-keyring', () => {
         value: '0x1000',
       }
       const tx = new EthereumTx(txParams)
+
+      const signed = await keyring.signTransaction(address, tx)
+      assert.ok(signed.raw, 'has a raw signature')
+    })
+
+    it('returns a signed tx object when using newer versions of ethereumjs/tx', async () => {
+      await keyring.deserialize([privateKey])
+
+      const txParams = {
+        from: address,
+        nonce: '0x00',
+        gasPrice: '0x09184e72a000',
+        gasLimit: '0x2710',
+        to: address,
+        value: '0x1000',
+      }
+      const tx = TransactionFactory.fromTxData(txParams)
 
       const signed = await keyring.signTransaction(address, tx)
       assert.ok(signed.raw, 'has a raw signature')

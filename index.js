@@ -51,8 +51,9 @@ class SimpleKeyring extends EventEmitter {
   // tx is an instance of the ethereumjs-transaction class.
   signTransaction (address, tx, opts = {}) {
     const privKey = this.getPrivateKeyFor(address, opts)
-    tx.sign(privKey)
-    return Promise.resolve(tx)
+    const signedTx = tx.sign(privKey)
+    // Newer versions of Ethereumjs-tx are immutable and return a new tx object
+    return Promise.resolve(signedTx === undefined ? tx : signedTx)
   }
 
   // For eth_sign, we need to sign arbitrary data:

@@ -98,7 +98,7 @@ describe('simple-keyring', () => {
 
     it('reliably can decode messages it signs', async () => {
       const localMessage = 'hello there!'
-      const msgHashHex = ethUtil.bufferToHex(ethUtil.sha3(localMessage))
+      const msgHashHex = ethUtil.bufferToHex(ethUtil.keccak(Buffer.from(localMessage)))
 
       await keyring.deserialize([privateKey])
       await keyring.addAccounts(9)

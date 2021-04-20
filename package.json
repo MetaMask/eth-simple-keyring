@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/MetaMask/eth-simple-keyring#readme",
   "dependencies": {
-    "eth-sig-util": "^2.5.0",
+    "eth-sig-util": "^3.0.1",
     "ethereumjs-util": "^7.0.9",
     "ethereumjs-wallet": "^1.0.1",
     "events": "^1.1.1"

@@ -6,6 +6,9 @@
   "files": [
     "index.js"
   ],
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "scripts": {
     "test": "mocha",
     "lint": "eslint . --ext js,json",

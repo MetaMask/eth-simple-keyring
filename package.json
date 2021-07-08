@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/MetaMask/eth-simple-keyring.git"
+    "url": "https://github.com/MetaMask/eth-simple-keyring.git"
   },
   "keywords": [
     "ethereum",
@@ -40,6 +40,7 @@
   "devDependencies": {
     "@ethereumjs/tx": "^3.1.1",
     "@lavamoat/allow-scripts": "^1.0.6",
+    "@metamask/auto-changelog": "^2.4.0",
     "@metamask/eslint-config": "^7.0.1",
     "@metamask/eslint-config-mocha": "^7.0.0",
     "@metamask/eslint-config-nodejs": "^7.0.1",

@@ -1,11 +1,3 @@
-*.tgz
-
-### macOS ###
-# General
-.DS_Store
-.AppleDouble
-.LSOverride
-
 # Dependency directories
 node_modules/
 
@@ -19,3 +11,12 @@ yarn-error.log*
 
 # ESLint
 .eslintcache
+
+# Jest
+/coverage
+
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride

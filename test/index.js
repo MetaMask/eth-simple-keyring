@@ -3,8 +3,7 @@
 const assert = require('assert')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
-const { Transaction: EthereumTx } = require('ethereumjs-tx')
-const { TransactionFactory } = require('@ethereumjs/tx')
+const { TransactionFactory, Transaction: EthereumTx } = require('@ethereumjs/tx')
 const { expect } = require('chai')
 const SimpleKeyring = require('..')
 

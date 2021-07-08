@@ -10,6 +10,7 @@
     "node": ">=12.0.0"
   },
   "scripts": {
+    "setup": "yarn install && yarn allow-scripts",
     "test": "mocha",
     "lint": "eslint . --ext js,json",
     "lint:fix": "eslint . --ext js,json --fix"
@@ -36,11 +37,19 @@
   },
   "devDependencies": {
     "@ethereumjs/tx": "^3.1.1",
+    "@lavamoat/allow-scripts": "^1.0.6",
     "@metamask/eslint-config": "^3.2.0",
     "chai": "^4.1.2",
     "eslint": "^7.2.0",
     "eslint-plugin-import": "^2.21.2",
     "eslint-plugin-json": "^2.1.1",
     "mocha": "^8.1.1"
+  },
+  "lavamoat": {
+    "allowScripts": {
+      "keccak": true,
+      "secp256k1": true,
+      "@lavamoat/preinstall-always-fail": false
+    }
   }
 }

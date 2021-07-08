@@ -65,16 +65,6 @@ class SimpleKeyring extends EventEmitter {
     return Promise.resolve(rawMsgSig)
   }
 
-  // For eth_sign, we need to sign transactions:
-  newGethSignMessage (withAccount, msgHex, opts = {}) {
-    const privKey = this.getPrivateKeyFor(withAccount, opts)
-    const msgBuffer = ethUtil.toBuffer(msgHex)
-    const msgHash = ethUtil.hashPersonalMessage(msgBuffer)
-    const msgSig = ethUtil.ecsign(msgHash, privKey)
-    const rawMsgSig = sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s)
-    return Promise.resolve(rawMsgSig)
-  }
-
   // For personal_sign, we need to prefix the message:
   signPersonalMessage (address, msgHex, opts = {}) {
     const privKey = this.getPrivateKeyFor(address, opts)

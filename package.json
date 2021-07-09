@@ -34,8 +34,7 @@
   "dependencies": {
     "eth-sig-util": "^3.0.1",
     "ethereumjs-util": "^7.0.9",
-    "ethereumjs-wallet": "^1.0.1",
-    "events": "^1.1.1"
+    "ethereumjs-wallet": "^1.0.1"
   },
   "devDependencies": {
     "@ethereumjs/tx": "^3.1.1",

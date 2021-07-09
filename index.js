@@ -9,20 +9,20 @@ class SimpleKeyring extends EventEmitter {
   constructor(opts) {
     super();
     this.type = type;
-    this.wallets = [];
+    this._wallets = [];
     this.deserialize(opts);
   }
 
   serialize() {
     return Promise.resolve(
-      this.wallets.map((w) => w.getPrivateKey().toString('hex')),
+      this._wallets.map((w) => w.getPrivateKey().toString('hex')),
     );
   }
 
   deserialize(privateKeys = []) {
     return new Promise((resolve, reject) => {
       try {
-        this.wallets = privateKeys.map((privateKey) => {
+        this._wallets = privateKeys.map((privateKey) => {
           const stripped = ethUtil.stripHexPrefix(privateKey);
           const buffer = Buffer.from(stripped, 'hex');
           const wallet = Wallet.fromPrivateKey(buffer);
@@ -40,7 +40,7 @@ class SimpleKeyring extends EventEmitter {
     for (let i = 0; i < n; i++) {
       newWallets.push(Wallet.generate());
     }
-    this.wallets = this.wallets.concat(newWallets);
+    this._wallets = this._wallets.concat(newWallets);
     const hexWallets = newWallets.map((w) =>
       ethUtil.bufferToHex(w.getAddress()),
     );
@@ -49,7 +49,7 @@ class SimpleKeyring extends EventEmitter {
 
   getAccounts() {
     return Promise.resolve(
-      this.wallets.map((w) => ethUtil.bufferToHex(w.getAddress())),
+      this._wallets.map((w) => ethUtil.bufferToHex(w.getAddress())),
     );
   }
 
@@ -165,13 +165,13 @@ class SimpleKeyring extends EventEmitter {
 
   removeAccount(address) {
     if (
-      !this.wallets
+      !this._wallets
         .map((w) => ethUtil.bufferToHex(w.getAddress()).toLowerCase())
         .includes(address.toLowerCase())
     ) {
       throw new Error(`Address ${address} not found in this keyring`);
     }
-    this.wallets = this.wallets.filter(
+    this._wallets = this._wallets.filter(
       (w) =>
         ethUtil.bufferToHex(w.getAddress()).toLowerCase() !==
         address.toLowerCase(),
@@ -183,7 +183,7 @@ class SimpleKeyring extends EventEmitter {
    */
   _getWalletForAccount(account, opts = {}) {
     const address = sigUtil.normalize(account);
-    let wallet = this.wallets.find(
+    let wallet = this._wallets.find(
       (w) => ethUtil.bufferToHex(w.getAddress()) === address,
     );
     if (!wallet) {

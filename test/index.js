@@ -48,15 +48,9 @@ describe('simple-keyring', function () {
   describe('#deserialize a private key', function () {
     it('serializes what it deserializes', async function () {
       await keyring.deserialize([testAccount.key]);
-      assert.equal(keyring.wallets.length, 1, 'has one wallet');
       const serialized = await keyring.serialize();
+      assert.equal(serialized.length, 1, 'has one wallet');
       assert.equal(serialized[0], ethUtil.stripHexPrefix(testAccount.key));
-      const accounts = await keyring.getAccounts();
-      assert.deepEqual(
-        accounts,
-        [testAccount.address],
-        'accounts match expected',
-      );
     });
   });
 
@@ -166,30 +160,27 @@ describe('simple-keyring', function () {
     describe('with no arguments', function () {
       it('creates a single wallet', async function () {
         await keyring.addAccounts();
-        assert.equal(keyring.wallets.length, 1);
+        const serializedKeyring = await keyring.serialize();
+        assert.equal(serializedKeyring.length, 1);
       });
     });
 
     describe('with a numeric argument', function () {
       it('creates that number of wallets', async function () {
         await keyring.addAccounts(3);
-        assert.equal(keyring.wallets.length, 3);
+        const serializedKeyring = await keyring.serialize();
+        assert.equal(serializedKeyring.length, 3);
       });
     });
   });
 
   describe('#getAccounts', function () {
-    it('calls getAddress on each wallet', async function () {
+    it('should return a list of addresses in wallet', async function () {
       // Push a mock wallet
-      const desiredOutput = '0x18a3462427bcc9133bb46e88bcbe39cd7ef0e761';
-      keyring.wallets.push({
-        getAddress() {
-          return ethUtil.toBuffer(desiredOutput);
-        },
-      });
+      keyring.deserialize([testAccount.key]);
 
       const output = await keyring.getAccounts();
-      assert.equal(output[0], desiredOutput);
+      assert.equal(output[0], testAccount.address);
       assert.equal(output.length, 1);
     });
   });

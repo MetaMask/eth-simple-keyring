@@ -2,13 +2,24 @@
   "name": "eth-simple-keyring",
   "version": "4.2.0",
   "description": "A simple standard interface for a series of Ethereum private keys.",
+  "keywords": [
+    "ethereum",
+    "keyring"
+  ],
+  "homepage": "https://github.com/MetaMask/eth-simple-keyring#readme",
+  "bugs": {
+    "url": "https://github.com/MetaMask/eth-simple-keyring/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MetaMask/eth-simple-keyring.git"
+  },
+  "license": "ISC",
+  "author": "Dan Finlay",
   "main": "index.js",
   "files": [
     "index.js"
   ],
-  "engines": {
-    "node": ">=12.0.0"
-  },
   "scripts": {
     "setup": "yarn install && yarn allow-scripts",
     "test": "mocha",
@@ -17,20 +28,6 @@
     "lint": "yarn lint:eslint && yarn lint:misc --check",
     "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/MetaMask/eth-simple-keyring.git"
-  },
-  "keywords": [
-    "ethereum",
-    "keyring"
-  ],
-  "author": "Dan Finlay",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/MetaMask/eth-simple-keyring/issues"
-  },
-  "homepage": "https://github.com/MetaMask/eth-simple-keyring#readme",
   "dependencies": {
     "eth-sig-util": "^3.0.1",
     "ethereumjs-util": "^7.0.9",
@@ -51,7 +48,11 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.4.0",
     "mocha": "^8.1.1",
-    "prettier": "^2.3.2"
+    "prettier": "^2.3.2",
+    "prettier-plugin-packagejson": "^2.2.11"
+  },
+  "engines": {
+    "node": ">=12.0.0"
   },
   "lavamoat": {
     "allowScripts": {

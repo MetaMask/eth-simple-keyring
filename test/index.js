@@ -1,13 +1,9 @@
-/* eslint-env mocha */
-
-const assert = require('assert');
 const ethUtil = require('ethereumjs-util');
 const sigUtil = require('eth-sig-util');
 const {
   TransactionFactory,
   Transaction: EthereumTx,
 } = require('@ethereumjs/tx');
-const { expect } = require('chai');
 const SimpleKeyring = require('..');
 
 const TYPE_STR = 'Simple Key Pair';
@@ -27,21 +23,14 @@ describe('simple-keyring', function () {
   describe('Keyring.type', function () {
     it('is a class property that returns the type string.', function () {
       const { type } = SimpleKeyring;
-      assert.equal(type, TYPE_STR);
-    });
-  });
-
-  describe('#type', function () {
-    it('returns the correct value', function () {
-      const { type } = keyring;
-      assert.equal(type, TYPE_STR);
+      expect(type).toBe(TYPE_STR);
     });
   });
 
   describe('#serialize empty wallets.', function () {
     it('serializes an empty array', async function () {
       const output = await keyring.serialize();
-      assert.deepEqual(output, []);
+      expect(output).toHaveLength(0);
     });
   });
 
@@ -49,8 +38,8 @@ describe('simple-keyring', function () {
     it('serializes what it deserializes', async function () {
       await keyring.deserialize([testAccount.key]);
       const serialized = await keyring.serialize();
-      assert.equal(serialized.length, 1, 'has one wallet');
-      assert.equal(serialized[0], ethUtil.stripHexPrefix(testAccount.key));
+      expect(serialized).toHaveLength(1);
+      expect(serialized[0]).toBe(ethUtil.stripHexPrefix(testAccount.key));
     });
   });
 
@@ -58,11 +47,7 @@ describe('simple-keyring', function () {
     it('has the correct addresses', async function () {
       const newKeyring = new SimpleKeyring([testAccount.key]);
       const accounts = await newKeyring.getAccounts();
-      assert.deepEqual(
-        accounts,
-        [testAccount.address],
-        'accounts match expected',
-      );
+      expect(accounts).toStrictEqual([testAccount.address]);
     });
   });
 
@@ -70,6 +55,24 @@ describe('simple-keyring', function () {
     const address = '0x9858e7d8b79fc3e6d989636721584498926da38a';
     const privateKey =
       '0x7dd98753d7b4394095de7d176c58128e2ed6ee600abe97c9f6d9fd65015d9b18';
+
+    it('returns a signed legacy tx object', async function () {
+      await keyring.deserialize([privateKey]);
+
+      const txParams = {
+        from: address,
+        nonce: '0x00',
+        gasPrice: '0x09184e72a000',
+        gasLimit: '0x2710',
+        to: address,
+        value: '0x1000',
+      };
+      const tx = new EthereumTx(txParams);
+      expect(tx.isSigned()).toBe(false);
+
+      const signed = await keyring.signTransaction(address, tx);
+      expect(signed.isSigned()).toBe(true);
+    });
 
     it('returns a signed tx object', async function () {
       await keyring.deserialize([privateKey]);
@@ -82,27 +85,11 @@ describe('simple-keyring', function () {
         to: address,
         value: '0x1000',
       };
-      const tx = new EthereumTx(txParams);
-
-      const signed = await keyring.signTransaction(address, tx);
-      assert.ok(signed.raw, 'has a raw signature');
-    });
-
-    it('returns a signed tx object when using newer versions of ethereumjs/tx', async function () {
-      await keyring.deserialize([privateKey]);
-
-      const txParams = {
-        from: address,
-        nonce: '0x00',
-        gasPrice: '0x09184e72a000',
-        gasLimit: '0x2710',
-        to: address,
-        value: '0x1000',
-      };
       const tx = TransactionFactory.fromTxData(txParams);
+      expect(tx.isSigned()).toBe(false);
 
       const signed = await keyring.signTransaction(address, tx);
-      assert.ok(signed.raw, 'has a raw signature');
+      expect(signed.isSigned()).toBe(true);
     });
   });
 
@@ -118,7 +105,7 @@ describe('simple-keyring', function () {
     it('passes the dennis test', async function () {
       await keyring.deserialize([privateKey]);
       const result = await keyring.signMessage(address, message);
-      assert.equal(result, expectedResult);
+      expect(result).toBe(expectedResult);
     });
 
     it('reliably can decode messages it signs', async function () {
@@ -147,11 +134,7 @@ describe('simple-keyring', function () {
         const pub = ethUtil.ecrecover(m, v, r, s);
         const adr = `0x${ethUtil.pubToAddress(pub).toString('hex')}`;
 
-        assert.equal(
-          adr,
-          accountAddress,
-          'recovers address from signature correctly',
-        );
+        expect(adr).toBe(accountAddress);
       });
     });
   });
@@ -161,7 +144,7 @@ describe('simple-keyring', function () {
       it('creates a single wallet', async function () {
         await keyring.addAccounts();
         const serializedKeyring = await keyring.serialize();
-        assert.equal(serializedKeyring.length, 1);
+        expect(serializedKeyring).toHaveLength(1);
       });
     });
 
@@ -169,7 +152,7 @@ describe('simple-keyring', function () {
       it('creates that number of wallets', async function () {
         await keyring.addAccounts(3);
         const serializedKeyring = await keyring.serialize();
-        assert.equal(serializedKeyring.length, 3);
+        expect(serializedKeyring).toHaveLength(3);
       });
     });
   });
@@ -180,8 +163,8 @@ describe('simple-keyring', function () {
       keyring.deserialize([testAccount.key]);
 
       const output = await keyring.getAccounts();
-      assert.equal(output[0], testAccount.address);
-      assert.equal(output.length, 1);
+      expect(output).toHaveLength(1);
+      expect(output[0]).toBe(testAccount.address);
     });
   });
 
@@ -190,19 +173,19 @@ describe('simple-keyring', function () {
       it('should remove that account', async function () {
         await keyring.addAccounts();
         const addresses = await keyring.getAccounts();
+        expect(addresses).toHaveLength(1);
         keyring.removeAccount(addresses[0]);
         const addressesAfterRemoval = await keyring.getAccounts();
-        assert.equal(addressesAfterRemoval.length, addresses.length - 1);
+        expect(addressesAfterRemoval).toHaveLength(0);
       });
     });
 
     describe('if the account does not exist', function () {
-      it('should throw an error', function (done) {
+      it('should throw an error', function () {
         const unexistingAccount = '0x0000000000000000000000000000000000000000';
-        expect((_) => {
-          keyring.removeAccount(unexistingAccount);
-        }).to.throw(`Address ${unexistingAccount} not found in this keyring`);
-        done();
+        expect(() => keyring.removeAccount(unexistingAccount)).toThrow(
+          `Address ${unexistingAccount} not found in this keyring`,
+        );
       });
     });
   });
@@ -221,14 +204,13 @@ describe('simple-keyring', function () {
 
       await keyring.deserialize([privKeyHex]);
       const sig = await keyring.signPersonalMessage(address, message);
-      assert.equal(sig, signature, 'signature matches');
+      expect(sig).toBe(signature);
 
       const restored = sigUtil.recoverPersonalSignature({
         data: message,
         sig,
       });
-
-      assert.equal(restored, address, 'recovered address');
+      expect(restored).toBe(address);
     });
   });
 
@@ -253,9 +235,9 @@ describe('simple-keyring', function () {
       const sig = await keyring.signTypedData(address, typedData);
       const signedParams = Object.create(msgParams);
       signedParams.sig = sig;
-      assert.equal(sig, expectedSig, 'produced correct signature.');
+      expect(sig).toBe(expectedSig);
       const restored = sigUtil.recoverTypedSignatureLegacy(signedParams);
-      assert.equal(restored, address, 'recovered address');
+      expect(restored).toBe(address);
     });
   });
 
@@ -280,9 +262,9 @@ describe('simple-keyring', function () {
       const sig = await keyring.signTypedData_v1(address, typedData);
       const signedParams = Object.create(msgParams);
       signedParams.sig = sig;
-      assert.equal(sig, expectedSig, 'produced correct signature.');
+      expect(sig).toBe(expectedSig);
       const restored = sigUtil.recoverTypedSignatureLegacy(signedParams);
-      assert.equal(restored, address, 'recovered address');
+      expect(restored).toBe(address);
     });
 
     it('works via version paramter', async function () {
@@ -290,9 +272,9 @@ describe('simple-keyring', function () {
       const sig = await keyring.signTypedData(address, typedData);
       const signedParams = Object.create(msgParams);
       signedParams.sig = sig;
-      assert.equal(sig, expectedSig, 'produced correct signature.');
+      expect(sig).toBe(expectedSig);
       const restored = sigUtil.recoverTypedSignatureLegacy(signedParams);
-      assert.equal(restored, address, 'recovered address');
+      expect(restored).toBe(address);
     });
   });
 
@@ -314,7 +296,7 @@ describe('simple-keyring', function () {
       await keyring.deserialize([privKeyHex]);
       const sig = await keyring.signTypedData_v3(address, typedData);
       const restored = sigUtil.recoverTypedSignature({ data: typedData, sig });
-      assert.equal(restored, address, 'recovered address');
+      expect(restored).toBe(address);
     });
 
     it('works via the version parameter', async function () {
@@ -332,7 +314,7 @@ describe('simple-keyring', function () {
         version: 'V3',
       });
       const restored = sigUtil.recoverTypedSignature({ data: typedData, sig });
-      assert.equal(restored, address, 'recovered address');
+      expect(restored).toBe(address);
     });
   });
 
@@ -387,11 +369,11 @@ describe('simple-keyring', function () {
       const addresses = await keyring.getAccounts();
       const [address] = addresses;
       const sig = await keyring.signTypedData_v3(address, typedData.data);
-      assert.equal(sig, expectedSig, 'verified signature');
+      expect(sig).toBe(expectedSig);
       const signedData = Object.create(typedData);
       signedData.sig = sig;
       const restored = sigUtil.recoverTypedSignature(signedData);
-      assert.equal(restored, address, 'recovered address');
+      expect(restored).toBe(address);
     });
   });
 
@@ -413,7 +395,7 @@ describe('simple-keyring', function () {
       await keyring.deserialize([privKeyHex]);
       const sig = await keyring.signTypedData_v4(address, typedData);
       const restored = sigUtil.recoverTypedSignature({ data: typedData, sig });
-      assert.equal(restored, address, 'recovered address');
+      expect(restored).toBe(address);
     });
   });
 
@@ -437,7 +419,7 @@ describe('simple-keyring', function () {
         address,
         encryptedMessage,
       );
-      assert.equal(message, decryptedMessage, 'signature matches');
+      expect(message).toBe(decryptedMessage);
     });
   });
 
@@ -455,7 +437,7 @@ describe('simple-keyring', function () {
         address,
         privateKey,
       );
-      assert.equal(publicKey, encryptionPublicKey, 'public keys matches');
+      expect(publicKey).toBe(encryptionPublicKey);
     });
   });
 
@@ -525,11 +507,11 @@ describe('simple-keyring', function () {
       const [address] = addresses;
 
       const sig = await keyring.signTypedData_v4(address, typedData.data);
-      assert.equal(sig, expectedSig, 'verified signature');
+      expect(sig).toBe(expectedSig);
       const signedData = Object.create(typedData);
       signedData.sig = sig;
       const restored = sigUtil.recoverTypedSignature_v4(signedData);
-      assert.equal(restored, address, 'recovered address');
+      expect(restored).toBe(address);
     });
   });
 
@@ -543,8 +525,8 @@ describe('simple-keyring', function () {
         'someapp.origin.io',
       );
 
-      assert.notEqual(address, appKeyAddress);
-      assert(ethUtil.isValidAddress(appKeyAddress));
+      expect(address).not.toBe(appKeyAddress);
+      expect(ethUtil.isValidAddress(appKeyAddress)).toBe(true);
     });
 
     it('should return different addresses when provided different app key origins', async function () {
@@ -556,16 +538,15 @@ describe('simple-keyring', function () {
         'someapp.origin.io',
       );
 
-      assert(ethUtil.isValidAddress(appKeyAddress1));
+      expect(ethUtil.isValidAddress(appKeyAddress1)).toBe(true);
 
       const appKeyAddress2 = await simpleKeyring.getAppKeyAddress(
         address,
         'anotherapp.origin.io',
       );
 
-      assert(ethUtil.isValidAddress(appKeyAddress2));
-
-      assert.notEqual(appKeyAddress1, appKeyAddress2);
+      expect(ethUtil.isValidAddress(appKeyAddress2)).toBe(true);
+      expect(appKeyAddress1).not.toBe(appKeyAddress2);
     });
 
     it('should return the same address when called multiple times with the same params', async function () {
@@ -577,42 +558,33 @@ describe('simple-keyring', function () {
         'someapp.origin.io',
       );
 
-      assert(ethUtil.isValidAddress(appKeyAddress1));
+      expect(ethUtil.isValidAddress(appKeyAddress1)).toBe(true);
 
       const appKeyAddress2 = await simpleKeyring.getAppKeyAddress(
         address,
         'someapp.origin.io',
       );
 
-      assert(ethUtil.isValidAddress(appKeyAddress2));
-
-      assert.equal(appKeyAddress1, appKeyAddress2);
+      expect(ethUtil.isValidAddress(appKeyAddress2)).toBe(true);
+      expect(appKeyAddress1).toBe(appKeyAddress2);
     });
 
     it('should throw error if the provided origin is not a string', async function () {
       const { address } = testAccount;
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
 
-      try {
-        await simpleKeyring.getAppKeyAddress(address, []);
-      } catch (error) {
-        assert(error instanceof Error, 'Value thrown is not an error');
-        return;
-      }
-      assert.fail('Should have thrown error');
+      await expect(simpleKeyring.getAppKeyAddress(address, [])).rejects.toThrow(
+        `'origin' must be a non-empty string`,
+      );
     });
 
     it('should throw error if the provided origin is an empty string', async function () {
       const { address } = testAccount;
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
 
-      try {
-        await simpleKeyring.getAppKeyAddress(address, '');
-      } catch (error) {
-        assert(error instanceof Error, 'Value thrown is not an error');
-        return;
-      }
-      assert.fail('Should have thrown error');
+      await expect(simpleKeyring.getAppKeyAddress(address, '')).rejects.toThrow(
+        `'origin' must be a non-empty string`,
+      );
     });
   });
 
@@ -633,7 +605,7 @@ describe('simple-keyring', function () {
         withAppKeyOrigin: 'someapp.origin.io',
       });
 
-      assert.equal(expectedSig, sig, 'sign with app key generated private key');
+      expect(expectedSig).toBe(sig);
     });
 
     it('should signTypedData_v3 with the expected key when passed a withAppKeyOrigin', async function () {
@@ -659,7 +631,7 @@ describe('simple-keyring', function () {
         withAppKeyOrigin: 'someapp.origin.io',
       });
 
-      assert.equal(expectedSig, sig, 'sign with app key generated private key');
+      expect(expectedSig).toBe(sig);
     });
   });
 });

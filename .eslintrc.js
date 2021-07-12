@@ -7,7 +7,7 @@ module.exports = {
   overrides: [
     {
       files: ['test/**/*.js'],
-      extends: ['@metamask/eslint-config-mocha'],
+      extends: ['@metamask/eslint-config-jest'],
     },
   ],
   rules: {

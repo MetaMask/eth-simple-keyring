@@ -55,7 +55,7 @@ class SimpleKeyring extends EventEmitter {
 
   // tx is an instance of the ethereumjs-transaction class.
   signTransaction(address, tx, opts = {}) {
-    const privKey = this.getPrivateKeyFor(address, opts);
+    const privKey = this._getPrivateKeyFor(address, opts);
     const signedTx = tx.sign(privKey);
     // Newer versions of Ethereumjs-tx are immutable and return a new tx object
     return Promise.resolve(signedTx === undefined ? tx : signedTx);
@@ -64,7 +64,7 @@ class SimpleKeyring extends EventEmitter {
   // For eth_sign, we need to sign arbitrary data:
   signMessage(address, data, opts = {}) {
     const message = ethUtil.stripHexPrefix(data);
-    const privKey = this.getPrivateKeyFor(address, opts);
+    const privKey = this._getPrivateKeyFor(address, opts);
     const msgSig = ethUtil.ecsign(Buffer.from(message, 'hex'), privKey);
     const rawMsgSig = sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s);
     return Promise.resolve(rawMsgSig);
@@ -72,7 +72,7 @@ class SimpleKeyring extends EventEmitter {
 
   // For personal_sign, we need to prefix the message:
   signPersonalMessage(address, msgHex, opts = {}) {
-    const privKey = this.getPrivateKeyFor(address, opts);
+    const privKey = this._getPrivateKeyFor(address, opts);
     const privKeyBuffer = Buffer.from(privKey, 'hex');
     const sig = sigUtil.personalSign(privKeyBuffer, { data: msgHex });
     return Promise.resolve(sig);
@@ -102,33 +102,33 @@ class SimpleKeyring extends EventEmitter {
 
   // personal_signTypedData, signs data along with the schema
   signTypedData_v1(withAccount, typedData, opts = {}) {
-    const privKey = this.getPrivateKeyFor(withAccount, opts);
+    const privKey = this._getPrivateKeyFor(withAccount, opts);
     const sig = sigUtil.signTypedDataLegacy(privKey, { data: typedData });
     return Promise.resolve(sig);
   }
 
   // personal_signTypedData, signs data along with the schema
   signTypedData_v3(withAccount, typedData, opts = {}) {
-    const privKey = this.getPrivateKeyFor(withAccount, opts);
+    const privKey = this._getPrivateKeyFor(withAccount, opts);
     const sig = sigUtil.signTypedData(privKey, { data: typedData });
     return Promise.resolve(sig);
   }
 
   // personal_signTypedData, signs data along with the schema
   signTypedData_v4(withAccount, typedData, opts = {}) {
-    const privKey = this.getPrivateKeyFor(withAccount, opts);
+    const privKey = this._getPrivateKeyFor(withAccount, opts);
     const sig = sigUtil.signTypedData_v4(privKey, { data: typedData });
     return Promise.resolve(sig);
   }
 
   // get public key for nacl
   getEncryptionPublicKey(withAccount, opts = {}) {
-    const privKey = this.getPrivateKeyFor(withAccount, opts);
+    const privKey = this._getPrivateKeyFor(withAccount, opts);
     const publicKey = sigUtil.getEncryptionPublicKey(privKey);
     return Promise.resolve(publicKey);
   }
 
-  getPrivateKeyFor(address, opts = {}) {
+  _getPrivateKeyFor(address, opts = {}) {
     if (!address) {
       throw new Error('Must specify address.');
     }

@@ -90,21 +90,21 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // personal_signTypedData, signs data along with the schema
-  async _signTypedData_v1(withAccount, typedData, opts = {}) {
+  async _signTypedData_v1(withAccount, typedData, opts) {
     const privKey = this._getPrivateKeyFor(withAccount, opts);
     const sig = sigUtil.signTypedDataLegacy(privKey, { data: typedData });
     return sig;
   }
 
   // personal_signTypedData, signs data along with the schema
-  async _signTypedData_v3(withAccount, typedData, opts = {}) {
+  async _signTypedData_v3(withAccount, typedData, opts) {
     const privKey = this._getPrivateKeyFor(withAccount, opts);
     const sig = sigUtil.signTypedData(privKey, { data: typedData });
     return sig;
   }
 
   // personal_signTypedData, signs data along with the schema
-  async _signTypedData_v4(withAccount, typedData, opts = {}) {
+  async _signTypedData_v4(withAccount, typedData, opts) {
     const privKey = this._getPrivateKeyFor(withAccount, opts);
     const sig = sigUtil.signTypedData_v4(privKey, { data: typedData });
     return sig;

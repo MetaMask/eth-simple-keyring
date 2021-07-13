@@ -79,32 +79,32 @@ class SimpleKeyring extends EventEmitter {
   async signTypedData(withAccount, typedData, opts = { version: 'V1' }) {
     switch (opts.version) {
       case 'V1':
-        return this.signTypedData_v1(withAccount, typedData, opts);
+        return this._signTypedData_v1(withAccount, typedData, opts);
       case 'V3':
-        return this.signTypedData_v3(withAccount, typedData, opts);
+        return this._signTypedData_v3(withAccount, typedData, opts);
       case 'V4':
-        return this.signTypedData_v4(withAccount, typedData, opts);
+        return this._signTypedData_v4(withAccount, typedData, opts);
       default:
-        return this.signTypedData_v1(withAccount, typedData, opts);
+        return this._signTypedData_v1(withAccount, typedData, opts);
     }
   }
 
   // personal_signTypedData, signs data along with the schema
-  async signTypedData_v1(withAccount, typedData, opts = {}) {
+  async _signTypedData_v1(withAccount, typedData, opts) {
     const privKey = this._getPrivateKeyFor(withAccount, opts);
     const sig = sigUtil.signTypedDataLegacy(privKey, { data: typedData });
     return sig;
   }
 
   // personal_signTypedData, signs data along with the schema
-  async signTypedData_v3(withAccount, typedData, opts = {}) {
+  async _signTypedData_v3(withAccount, typedData, opts) {
     const privKey = this._getPrivateKeyFor(withAccount, opts);
     const sig = sigUtil.signTypedData(privKey, { data: typedData });
     return sig;
   }
 
   // personal_signTypedData, signs data along with the schema
-  async signTypedData_v4(withAccount, typedData, opts = {}) {
+  async _signTypedData_v4(withAccount, typedData, opts) {
     const privKey = this._getPrivateKeyFor(withAccount, opts);
     const sig = sigUtil.signTypedData_v4(privKey, { data: typedData });
     return sig;

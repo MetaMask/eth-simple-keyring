@@ -32,7 +32,7 @@
   "dependencies": {
     "eth-sig-util": "^3.0.1",
     "ethereumjs-util": "^7.0.9",
-    "ethereumjs-wallet": "^1.0.1"
+    "randombytes": "^2.1.0"
   },
   "devDependencies": {
     "@ethereumjs/tx": "^3.1.1",

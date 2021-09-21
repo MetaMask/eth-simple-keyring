@@ -172,6 +172,7 @@ class SimpleKeyring extends EventEmitter {
     ) {
       throw new Error(`Address ${address} not found in this keyring`);
     }
+
     this._wallets = this._wallets.filter(
       ({ publicKey }) =>
         ethUtil

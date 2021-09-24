@@ -30,7 +30,7 @@
     "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write"
   },
   "dependencies": {
-    "eth-sig-util": "^3.0.1",
+    "@metamask/eth-sig-util": "^4.0.0",
     "ethereumjs-util": "^7.0.9",
     "randombytes": "^2.1.0"
   },

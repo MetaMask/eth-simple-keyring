@@ -1,5 +1,13 @@
 const ethUtil = require('ethereumjs-util');
-const sigUtil = require('eth-sig-util');
+const {
+  encrypt,
+  getEncryptionPublicKey,
+  personalSign,
+  recoverPersonalSignature,
+  recoverTypedSignature,
+  signTypedData,
+  SignTypedDataVersion,
+} = require('@metamask/eth-sig-util');
 const {
   TransactionFactory,
   Transaction: EthereumTx,
@@ -199,16 +207,16 @@ describe('simple-keyring', function () {
       );
       const privKeyHex = ethUtil.bufferToHex(privateKey);
       const message = '0x68656c6c6f20776f726c64';
-      const signature =
+      const expectedSignature =
         '0xce909e8ea6851bc36c007a0072d0524b07a3ff8d4e623aca4c71ca8e57250c4d0a3fc38fa8fbaaa81ead4b9f6bd03356b6f8bf18bccad167d78891636e1d69561b';
 
       await keyring.deserialize([privKeyHex]);
-      const sig = await keyring.signPersonalMessage(address, message);
-      expect(sig).toBe(signature);
+      const signature = await keyring.signPersonalMessage(address, message);
+      expect(signature).toBe(expectedSignature);
 
-      const restored = sigUtil.recoverPersonalSignature({
+      const restored = recoverPersonalSignature({
         data: message,
-        sig,
+        signature,
       });
       expect(restored).toBe(address);
     });
@@ -218,7 +226,7 @@ describe('simple-keyring', function () {
     const address = '0x29c76e6ad8f28bb1004902578fb108c507be341b';
     const privKeyHex =
       '4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0';
-    const expectedSig =
+    const expectedSignature =
       '0x49e75d475d767de7fcc67f521e0d86590723d872e6111e51c393e8c1e2f21d032dfaf5833af158915f035db6af4f37bf2d5d29781cd81f28a44c5cb4b9d241531b';
 
     const typedData = [
@@ -228,15 +236,30 @@ describe('simple-keyring', function () {
         value: 'Hi, Alice!',
       },
     ];
-    const msgParams = { data: typedData };
 
     it('returns the expected value', async function () {
       await keyring.deserialize([privKeyHex]);
-      const sig = await keyring.signTypedData(address, typedData);
-      const signedParams = Object.create(msgParams);
-      signedParams.sig = sig;
-      expect(sig).toBe(expectedSig);
-      const restored = sigUtil.recoverTypedSignatureLegacy(signedParams);
+      const signature = await keyring.signTypedData(address, typedData);
+      expect(signature).toBe(expectedSignature);
+      const restored = recoverTypedSignature({
+        data: typedData,
+        signature,
+        version: SignTypedDataVersion.V1,
+      });
+      expect(restored).toBe(address);
+    });
+
+    it('returns the expected value if invalid version is given', async function () {
+      await keyring.deserialize([privKeyHex]);
+      const signature = await keyring.signTypedData(address, typedData, {
+        version: 'FOO',
+      });
+      expect(signature).toBe(expectedSignature);
+      const restored = recoverTypedSignature({
+        data: typedData,
+        signature,
+        version: SignTypedDataVersion.V1,
+      });
       expect(restored).toBe(address);
     });
   });
@@ -245,7 +268,7 @@ describe('simple-keyring', function () {
     const address = '0x29c76e6ad8f28bb1004902578fb108c507be341b';
     const privKeyHex =
       '4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0';
-    const expectedSig =
+    const expectedSignature =
       '0x49e75d475d767de7fcc67f521e0d86590723d872e6111e51c393e8c1e2f21d032dfaf5833af158915f035db6af4f37bf2d5d29781cd81f28a44c5cb4b9d241531b';
 
     const typedData = [
@@ -255,27 +278,30 @@ describe('simple-keyring', function () {
         value: 'Hi, Alice!',
       },
     ];
-    const msgParams = { data: typedData };
 
     it('returns the expected value', async function () {
       await keyring.deserialize([privKeyHex]);
-      const sig = await keyring.signTypedData(address, typedData, {
+      const signature = await keyring.signTypedData(address, typedData, {
         version: 'V1',
       });
-      const signedParams = Object.create(msgParams);
-      signedParams.sig = sig;
-      expect(sig).toBe(expectedSig);
-      const restored = sigUtil.recoverTypedSignatureLegacy(signedParams);
+      expect(signature).toBe(expectedSignature);
+      const restored = recoverTypedSignature({
+        data: typedData,
+        signature,
+        version: SignTypedDataVersion.V1,
+      });
       expect(restored).toBe(address);
     });
 
     it('works via version paramter', async function () {
       await keyring.deserialize([privKeyHex]);
-      const sig = await keyring.signTypedData(address, typedData);
-      const signedParams = Object.create(msgParams);
-      signedParams.sig = sig;
-      expect(sig).toBe(expectedSig);
-      const restored = sigUtil.recoverTypedSignatureLegacy(signedParams);
+      const signature = await keyring.signTypedData(address, typedData);
+      expect(signature).toBe(expectedSignature);
+      const restored = recoverTypedSignature({
+        data: typedData,
+        signature,
+        version: SignTypedDataVersion.V1,
+      });
       expect(restored).toBe(address);
     });
   });
@@ -296,10 +322,14 @@ describe('simple-keyring', function () {
       };
 
       await keyring.deserialize([privKeyHex]);
-      const sig = await keyring.signTypedData(address, typedData, {
+      const signature = await keyring.signTypedData(address, typedData, {
         version: 'V3',
       });
-      const restored = sigUtil.recoverTypedSignature({ data: typedData, sig });
+      const restored = recoverTypedSignature({
+        data: typedData,
+        signature,
+        version: SignTypedDataVersion.V3,
+      });
       expect(restored).toBe(address);
     });
   });
@@ -307,60 +337,60 @@ describe('simple-keyring', function () {
   describe('#signTypedData V3 signature verification', function () {
     const privKeyHex =
       'c85ef7d79691fe79573b1a7064c19c1a9819ebdbd1faaab1a8ec92344438aaf4';
-    const expectedSig =
+    const expectedSignature =
       '0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c';
 
     it('returns the expected value', async function () {
       const typedData = {
-        data: {
-          types: {
-            EIP712Domain: [
-              { name: 'name', type: 'string' },
-              { name: 'version', type: 'string' },
-              { name: 'chainId', type: 'uint256' },
-              { name: 'verifyingContract', type: 'address' },
-            ],
-            Person: [
-              { name: 'name', type: 'string' },
-              { name: 'wallet', type: 'address' },
-            ],
-            Mail: [
-              { name: 'from', type: 'Person' },
-              { name: 'to', type: 'Person' },
-              { name: 'contents', type: 'string' },
-            ],
+        types: {
+          EIP712Domain: [
+            { name: 'name', type: 'string' },
+            { name: 'version', type: 'string' },
+            { name: 'chainId', type: 'uint256' },
+            { name: 'verifyingContract', type: 'address' },
+          ],
+          Person: [
+            { name: 'name', type: 'string' },
+            { name: 'wallet', type: 'address' },
+          ],
+          Mail: [
+            { name: 'from', type: 'Person' },
+            { name: 'to', type: 'Person' },
+            { name: 'contents', type: 'string' },
+          ],
+        },
+        primaryType: 'Mail',
+        domain: {
+          name: 'Ether Mail',
+          version: '1',
+          chainId: 1,
+          verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+        },
+        message: {
+          from: {
+            name: 'Cow',
+            wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
           },
-          primaryType: 'Mail',
-          domain: {
-            name: 'Ether Mail',
-            version: '1',
-            chainId: 1,
-            verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+          to: {
+            name: 'Bob',
+            wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
           },
-          message: {
-            from: {
-              name: 'Cow',
-              wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
-            },
-            to: {
-              name: 'Bob',
-              wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
-            },
-            contents: 'Hello, Bob!',
-          },
+          contents: 'Hello, Bob!',
         },
       };
 
       await keyring.deserialize([privKeyHex]);
       const addresses = await keyring.getAccounts();
       const [address] = addresses;
-      const sig = await keyring.signTypedData(address, typedData.data, {
+      const signature = await keyring.signTypedData(address, typedData, {
         version: 'V3',
       });
-      expect(sig).toBe(expectedSig);
-      const signedData = Object.create(typedData);
-      signedData.sig = sig;
-      const restored = sigUtil.recoverTypedSignature(signedData);
+      expect(signature).toBe(expectedSignature);
+      const restored = recoverTypedSignature({
+        data: typedData,
+        signature,
+        version: SignTypedDataVersion.V3,
+      });
       expect(restored).toBe(address);
     });
   });
@@ -381,10 +411,14 @@ describe('simple-keyring', function () {
       };
 
       await keyring.deserialize([privKeyHex]);
-      const sig = await keyring.signTypedData(address, typedData, {
+      const signature = await keyring.signTypedData(address, typedData, {
         version: 'V4',
       });
-      const restored = sigUtil.recoverTypedSignature({ data: typedData, sig });
+      const restored = recoverTypedSignature({
+        data: typedData,
+        signature,
+        version: SignTypedDataVersion.V4,
+      });
       expect(restored).toBe(address);
     });
   });
@@ -398,11 +432,11 @@ describe('simple-keyring', function () {
       );
       const privKeyHex = ethUtil.bufferToHex(privateKey);
       const message = 'Hello world!';
-      const encryptedMessage = sigUtil.encrypt(
-        sigUtil.getEncryptionPublicKey(privateKey),
-        { data: message },
-        'x25519-xsalsa20-poly1305',
-      );
+      const encryptedMessage = encrypt({
+        publicKey: getEncryptionPublicKey(privateKey),
+        data: message,
+        version: 'x25519-xsalsa20-poly1305',
+      });
 
       await keyring.deserialize([privKeyHex]);
       const decryptedMessage = await keyring.decryptMessage(
@@ -434,60 +468,58 @@ describe('simple-keyring', function () {
   describe('#signTypedData V4 signature verification', function () {
     const privKeyHex =
       'c85ef7d79691fe79573b1a7064c19c1a9819ebdbd1faaab1a8ec92344438aaf4';
-    const expectedSig =
+    const expectedSignature =
       '0x65cbd956f2fae28a601bebc9b906cea0191744bd4c4247bcd27cd08f8eb6b71c78efdf7a31dc9abee78f492292721f362d296cf86b4538e07b51303b67f749061b';
 
     it('returns the expected value', async function () {
       const typedData = {
-        data: {
-          types: {
-            EIP712Domain: [
-              { name: 'name', type: 'string' },
-              { name: 'version', type: 'string' },
-              { name: 'chainId', type: 'uint256' },
-              { name: 'verifyingContract', type: 'address' },
-            ],
-            Person: [
-              { name: 'name', type: 'string' },
-              { name: 'wallets', type: 'address[]' },
-            ],
-            Mail: [
-              { name: 'from', type: 'Person' },
-              { name: 'to', type: 'Person[]' },
-              { name: 'contents', type: 'string' },
-            ],
-            Group: [
-              { name: 'name', type: 'string' },
-              { name: 'members', type: 'Person[]' },
+        types: {
+          EIP712Domain: [
+            { name: 'name', type: 'string' },
+            { name: 'version', type: 'string' },
+            { name: 'chainId', type: 'uint256' },
+            { name: 'verifyingContract', type: 'address' },
+          ],
+          Person: [
+            { name: 'name', type: 'string' },
+            { name: 'wallets', type: 'address[]' },
+          ],
+          Mail: [
+            { name: 'from', type: 'Person' },
+            { name: 'to', type: 'Person[]' },
+            { name: 'contents', type: 'string' },
+          ],
+          Group: [
+            { name: 'name', type: 'string' },
+            { name: 'members', type: 'Person[]' },
+          ],
+        },
+        domain: {
+          name: 'Ether Mail',
+          version: '1',
+          chainId: 1,
+          verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+        },
+        primaryType: 'Mail',
+        message: {
+          from: {
+            name: 'Cow',
+            wallets: [
+              '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
+              '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF',
             ],
           },
-          domain: {
-            name: 'Ether Mail',
-            version: '1',
-            chainId: 1,
-            verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
-          },
-          primaryType: 'Mail',
-          message: {
-            from: {
-              name: 'Cow',
+          to: [
+            {
+              name: 'Bob',
               wallets: [
-                '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
-                '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF',
+                '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
+                '0xB0BdaBea57B0BDABeA57b0bdABEA57b0BDabEa57',
+                '0xB0B0b0b0b0b0B000000000000000000000000000',
               ],
             },
-            to: [
-              {
-                name: 'Bob',
-                wallets: [
-                  '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
-                  '0xB0BdaBea57B0BDABeA57b0bdABEA57b0BDabEa57',
-                  '0xB0B0b0b0b0b0B000000000000000000000000000',
-                ],
-              },
-            ],
-            contents: 'Hello, Bob!',
-          },
+          ],
+          contents: 'Hello, Bob!',
         },
       };
 
@@ -496,13 +528,15 @@ describe('simple-keyring', function () {
       const addresses = await keyring.getAccounts();
       const [address] = addresses;
 
-      const sig = await keyring.signTypedData(address, typedData.data, {
+      const signature = await keyring.signTypedData(address, typedData, {
         version: 'V4',
       });
-      expect(sig).toBe(expectedSig);
-      const signedData = Object.create(typedData);
-      signedData.sig = sig;
-      const restored = sigUtil.recoverTypedSignature_v4(signedData);
+      expect(signature).toBe(expectedSignature);
+      const restored = recoverTypedSignature({
+        data: typedData,
+        signature,
+        version: SignTypedDataVersion.V4,
+      });
       expect(restored).toBe(address);
     });
   });
@@ -587,17 +621,19 @@ describe('simple-keyring', function () {
 
       const privateKeyHex =
         '4fbe006f0e9c2374f53eb1aef1b6970d20206c61ea05ad9591ef42176eb842c0';
-      const privateKeyBuffer = Buffer.from(privateKeyHex, 'hex');
-      const expectedSig = sigUtil.personalSign(privateKeyBuffer, {
-        data: message,
-      });
+      const privateKey = Buffer.from(privateKeyHex, 'hex');
+      const expectedSignature = personalSign({ privateKey, data: message });
 
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
-      const sig = await simpleKeyring.signPersonalMessage(address, message, {
-        withAppKeyOrigin: 'someapp.origin.io',
-      });
+      const signature = await simpleKeyring.signPersonalMessage(
+        address,
+        message,
+        {
+          withAppKeyOrigin: 'someapp.origin.io',
+        },
+      );
 
-      expect(expectedSig).toBe(sig);
+      expect(expectedSignature).toBe(signature);
     });
 
     it('should signTypedData V3 with the expected key when passed a withAppKeyOrigin', async function () {
@@ -613,18 +649,20 @@ describe('simple-keyring', function () {
 
       const privateKeyHex =
         '4fbe006f0e9c2374f53eb1aef1b6970d20206c61ea05ad9591ef42176eb842c0';
-      const privateKeyBuffer = Buffer.from(privateKeyHex, 'hex');
-      const expectedSig = sigUtil.signTypedData(privateKeyBuffer, {
+      const privateKey = Buffer.from(privateKeyHex, 'hex');
+      const expectedSignature = signTypedData({
+        privateKey,
         data: typedData,
+        version: SignTypedDataVersion.V3,
       });
 
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
-      const sig = await simpleKeyring.signTypedData(address, typedData, {
+      const signature = await simpleKeyring.signTypedData(address, typedData, {
         withAppKeyOrigin: 'someapp.origin.io',
         version: 'V3',
       });
 
-      expect(expectedSig).toBe(sig);
+      expect(expectedSignature).toBe(signature);
     });
   });
 });

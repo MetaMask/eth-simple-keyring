@@ -92,7 +92,7 @@ describe('simple-keyring', function () {
       expect(signed.isSigned()).toBe(true);
     });
 
-    it('throw error if empty address is passed', async function () {
+    it('returns rejected promise if empty address is passed', async function () {
       await keyring.deserialize([privateKey]);
       const tx = TransactionFactory.fromTxData(txParams);
       await expect(keyring.signTransaction('', tx)).rejects.toThrow(
@@ -168,7 +168,7 @@ describe('simple-keyring', function () {
       );
     });
 
-    it('throw error if wrong address is passed', async function () {
+    it('throw error if address not associated with the current keyring is passed', async function () {
       await keyring.deserialize([privateKey]);
       await expect(
         keyring.signMessage(notKeyringAddress, message),
@@ -489,7 +489,7 @@ describe('simple-keyring', function () {
       expect(message).toBe(decryptedMessage);
     });
 
-    it('throw error if account is not present', async function () {
+    it('throw error if address passed is not present in the keyring', async function () {
       await keyring.deserialize([privKeyHex]);
       await expect(
         keyring.decryptMessage(notKeyringAddress, encryptedMessage),

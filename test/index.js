@@ -168,7 +168,7 @@ describe('simple-keyring', function () {
       );
     });
 
-    it('throw error if wrong address is passed', async function () {
+    it('throw error if address not associated with the current keyring is passed', async function () {
       await expect(
         keyring.signMessage(invalidAddress, message),
       ).rejects.toThrow('Simple Keyring - Unable to find matching address.');

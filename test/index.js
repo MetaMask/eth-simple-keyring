@@ -493,7 +493,7 @@ describe('simple-keyring', function () {
       expect(message).toBe(decryptedMessage);
     });
 
-    it('throw error if account is not present', async function () {
+    it('throw error if address passed is not present in the keyring', async function () {
       await expect(
         keyring.decryptMessage(invalidAddress, encryptedMessage),
       ).rejects.toThrow('Simple Keyring - Unable to find matching address.');

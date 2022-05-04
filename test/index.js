@@ -92,7 +92,7 @@ describe('simple-keyring', function () {
       expect(signed.isSigned()).toBe(true);
     });
 
-    it('throw error if empty address is passed', async function () {
+    it('returns rejected promise if empty address is passed', async function () {
       await keyring.deserialize([privateKey]);
       const tx = TransactionFactory.fromTxData(txParams);
       await expect(keyring.signTransaction('', tx)).rejects.toThrow(

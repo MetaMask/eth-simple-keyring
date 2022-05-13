@@ -22,6 +22,8 @@ const testAccount = {
   address: '0x01560cd3bac62cc6d7e6380600d9317363400896',
 };
 
+const notKeyringAddress = '0xbD20F6F5F1616947a39E11926E78ec94817B3931';
+
 describe('simple-keyring', function () {
   let keyring;
   beforeEach(function () {
@@ -63,18 +65,17 @@ describe('simple-keyring', function () {
     const address = '0x9858e7d8b79fc3e6d989636721584498926da38a';
     const privateKey =
       '0x7dd98753d7b4394095de7d176c58128e2ed6ee600abe97c9f6d9fd65015d9b18';
+    const txParams = {
+      from: address,
+      nonce: '0x00',
+      gasPrice: '0x09184e72a000',
+      gasLimit: '0x2710',
+      to: address,
+      value: '0x1000',
+    };
 
     it('returns a signed legacy tx object', async function () {
       await keyring.deserialize([privateKey]);
-
-      const txParams = {
-        from: address,
-        nonce: '0x00',
-        gasPrice: '0x09184e72a000',
-        gasLimit: '0x2710',
-        to: address,
-        value: '0x1000',
-      };
       const tx = new EthereumTx(txParams);
       expect(tx.isSigned()).toBe(false);
 
@@ -84,20 +85,27 @@ describe('simple-keyring', function () {
 
     it('returns a signed tx object', async function () {
       await keyring.deserialize([privateKey]);
-
-      const txParams = {
-        from: address,
-        nonce: '0x00',
-        gasPrice: '0x09184e72a000',
-        gasLimit: '0x2710',
-        to: address,
-        value: '0x1000',
-      };
       const tx = TransactionFactory.fromTxData(txParams);
       expect(tx.isSigned()).toBe(false);
 
       const signed = await keyring.signTransaction(address, tx);
       expect(signed.isSigned()).toBe(true);
+    });
+
+    it('returns rejected promise if empty address is passed', async function () {
+      await keyring.deserialize([privateKey]);
+      const tx = TransactionFactory.fromTxData(txParams);
+      await expect(keyring.signTransaction('', tx)).rejects.toThrow(
+        'Must specify address.',
+      );
+    });
+
+    it('throw error if wrong address is passed', async function () {
+      await keyring.deserialize([privateKey]);
+      const tx = TransactionFactory.fromTxData(txParams);
+      await expect(
+        keyring.signTransaction(notKeyringAddress, tx),
+      ).rejects.toThrow('Simple Keyring - Unable to find matching address.');
     });
   });
 
@@ -117,12 +125,12 @@ describe('simple-keyring', function () {
     });
 
     it('reliably can decode messages it signs', async function () {
+      await keyring.deserialize([privateKey]);
       const localMessage = 'hello there!';
       const msgHashHex = ethUtil.bufferToHex(
         ethUtil.keccak(Buffer.from(localMessage)),
       );
 
-      await keyring.deserialize([privateKey]);
       await keyring.addAccounts(9);
       const addresses = await keyring.getAccounts();
       const signatures = await Promise.all(
@@ -144,6 +152,27 @@ describe('simple-keyring', function () {
 
         expect(adr).toBe(accountAddress);
       });
+    });
+
+    it('throw error for invalid message', async function () {
+      await keyring.deserialize([privateKey]);
+      await expect(keyring.signMessage(address, '')).rejects.toThrow(
+        'Expected message to be an Uint8Array with length 32',
+      );
+    });
+
+    it('throw error if empty address is passed', async function () {
+      await keyring.deserialize([privateKey]);
+      await expect(keyring.signMessage('', message)).rejects.toThrow(
+        'Must specify address.',
+      );
+    });
+
+    it('throw error if address not associated with the current keyring is passed', async function () {
+      await keyring.deserialize([privateKey]);
+      await expect(
+        keyring.signMessage(notKeyringAddress, message),
+      ).rejects.toThrow('Simple Keyring - Unable to find matching address.');
     });
   });
 
@@ -199,17 +228,17 @@ describe('simple-keyring', function () {
   });
 
   describe('#signPersonalMessage', function () {
-    it('returns the expected value', async function () {
-      const address = '0xbe93f9bacbcffc8ee6663f2647917ed7a20a57bb';
-      const privateKey = Buffer.from(
-        '6969696969696969696969696969696969696969696969696969696969696969',
-        'hex',
-      );
-      const privKeyHex = ethUtil.bufferToHex(privateKey);
-      const message = '0x68656c6c6f20776f726c64';
-      const expectedSignature =
-        '0xce909e8ea6851bc36c007a0072d0524b07a3ff8d4e623aca4c71ca8e57250c4d0a3fc38fa8fbaaa81ead4b9f6bd03356b6f8bf18bccad167d78891636e1d69561b';
+    const address = '0xbe93f9bacbcffc8ee6663f2647917ed7a20a57bb';
+    const privateKey = Buffer.from(
+      '6969696969696969696969696969696969696969696969696969696969696969',
+      'hex',
+    );
+    const privKeyHex = ethUtil.bufferToHex(privateKey);
+    const message = '0x68656c6c6f20776f726c64';
+    const expectedSignature =
+      '0xce909e8ea6851bc36c007a0072d0524b07a3ff8d4e623aca4c71ca8e57250c4d0a3fc38fa8fbaaa81ead4b9f6bd03356b6f8bf18bccad167d78891636e1d69561b';
 
+    it('returns the expected value', async function () {
       await keyring.deserialize([privKeyHex]);
       const signature = await keyring.signPersonalMessage(address, message);
       expect(signature).toBe(expectedSignature);
@@ -219,6 +248,20 @@ describe('simple-keyring', function () {
         signature,
       });
       expect(restored).toBe(address);
+    });
+
+    it('throw error if empty address is passed', async function () {
+      await keyring.deserialize([privKeyHex]);
+      await expect(keyring.signPersonalMessage('', message)).rejects.toThrow(
+        'Must specify address.',
+      );
+    });
+
+    it('throw error if wrong address is passed', async function () {
+      await keyring.deserialize([privKeyHex]);
+      await expect(
+        keyring.signPersonalMessage(notKeyringAddress, message),
+      ).rejects.toThrow('Simple Keyring - Unable to find matching address.');
     });
   });
 
@@ -424,20 +467,20 @@ describe('simple-keyring', function () {
   });
 
   describe('#decryptMessage', function () {
-    it('returns the expected value', async function () {
-      const address = '0xbe93f9bacbcffc8ee6663f2647917ed7a20a57bb';
-      const privateKey = Buffer.from(
-        '6969696969696969696969696969696969696969696969696969696969696969',
-        'hex',
-      );
-      const privKeyHex = ethUtil.bufferToHex(privateKey);
-      const message = 'Hello world!';
-      const encryptedMessage = encrypt({
-        publicKey: getEncryptionPublicKey(privateKey),
-        data: message,
-        version: 'x25519-xsalsa20-poly1305',
-      });
+    const address = '0xbe93f9bacbcffc8ee6663f2647917ed7a20a57bb';
+    const privateKey = Buffer.from(
+      '6969696969696969696969696969696969696969696969696969696969696969',
+      'hex',
+    );
+    const privKeyHex = ethUtil.bufferToHex(privateKey);
+    const message = 'Hello world!';
+    const encryptedMessage = encrypt({
+      publicKey: getEncryptionPublicKey(privateKey),
+      data: message,
+      version: 'x25519-xsalsa20-poly1305',
+    });
 
+    it('returns the expected value', async function () {
       await keyring.deserialize([privKeyHex]);
       const decryptedMessage = await keyring.decryptMessage(
         address,
@@ -445,23 +488,52 @@ describe('simple-keyring', function () {
       );
       expect(message).toBe(decryptedMessage);
     });
+
+    it('throw error if address passed is not present in the keyring', async function () {
+      await keyring.deserialize([privKeyHex]);
+      await expect(
+        keyring.decryptMessage(notKeyringAddress, encryptedMessage),
+      ).rejects.toThrow('Simple Keyring - Unable to find matching address.');
+    });
+
+    it('throw error if wrong encrypted data object is passed', async function () {
+      await keyring.deserialize([privKeyHex]);
+      await expect(keyring.decryptMessage(address, {})).rejects.toThrow(
+        'Encryption type/version not supported.',
+      );
+    });
   });
 
   describe('#encryptionPublicKey', function () {
+    const address = '0xbe93f9bacbcffc8ee6663f2647917ed7a20a57bb';
+    const privateKey = Buffer.from(
+      '6969696969696969696969696969696969696969696969696969696969696969',
+      'hex',
+    );
+    const publicKey = 'GxuMqoE2oHsZzcQtv/WMNB3gCH2P6uzynuwO1P0MM1U=';
+    const privKeyHex = ethUtil.bufferToHex(privateKey);
+
     it('returns the expected value', async function () {
-      const address = '0xbe93f9bacbcffc8ee6663f2647917ed7a20a57bb';
-      const privateKey = Buffer.from(
-        '6969696969696969696969696969696969696969696969696969696969696969',
-        'hex',
-      );
-      const publicKey = 'GxuMqoE2oHsZzcQtv/WMNB3gCH2P6uzynuwO1P0MM1U=';
-      const privKeyHex = ethUtil.bufferToHex(privateKey);
       await keyring.deserialize([privKeyHex]);
       const encryptionPublicKey = await keyring.getEncryptionPublicKey(
         address,
         privateKey,
       );
       expect(publicKey).toBe(encryptionPublicKey);
+    });
+
+    it('throw error if address is blank', async function () {
+      await keyring.deserialize([privKeyHex]);
+      await expect(
+        keyring.getEncryptionPublicKey('', privateKey),
+      ).rejects.toThrow('Must specify address.');
+    });
+
+    it('throw error if address is not present in the keyring', async function () {
+      await keyring.deserialize([privKeyHex]);
+      await expect(
+        keyring.getEncryptionPublicKey(notKeyringAddress, privateKey),
+      ).rejects.toThrow('Simple Keyring - Unable to find matching address.');
     });
   });
 
@@ -610,6 +682,21 @@ describe('simple-keyring', function () {
 
       await expect(simpleKeyring.getAppKeyAddress(address, '')).rejects.toThrow(
         `'origin' must be a non-empty string`,
+      );
+    });
+  });
+
+  describe('exportAccount', function () {
+    it('should return a hex-encoded private key', async function () {
+      const { address } = testAccount;
+      const simpleKeyring = new SimpleKeyring([testAccount.key]);
+      const privKeyHexValue = await simpleKeyring.exportAccount(address);
+      expect(testAccount.key).toBe(`0x${privKeyHexValue}`);
+    });
+
+    it('throw error if account is not present', async function () {
+      await expect(keyring.exportAccount(notKeyringAddress)).rejects.toThrow(
+        'Simple Keyring - Unable to find matching address.',
       );
     });
   });

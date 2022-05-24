@@ -1,4 +1,3 @@
-const { EventEmitter } = require('events');
 const ethUtil = require('ethereumjs-util');
 const randomBytes = require('randombytes');
 
@@ -26,9 +25,8 @@ function generateKey() {
   return privateKey;
 }
 
-class SimpleKeyring extends EventEmitter {
+class SimpleKeyring {
   constructor(opts) {
-    super();
     this.type = type;
     this._wallets = [];
     this.deserialize(opts);

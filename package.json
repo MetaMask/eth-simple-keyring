@@ -54,7 +54,7 @@
     "prettier-plugin-packagejson": "^2.2.11"
   },
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=14.0.0"
   },
   "lavamoat": {
     "allowScripts": {

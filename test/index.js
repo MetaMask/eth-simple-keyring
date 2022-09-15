@@ -1,4 +1,12 @@
-const ethUtil = require('ethereumjs-util');
+const {
+  stripHexPrefix,
+  bufferToHex,
+  toBuffer,
+  ecrecover,
+  pubToAddress,
+  isValidAddress,
+} = require('@ethereumjs/util');
+const { keccak256 } = require('ethereum-cryptography/keccak');
 const {
   encrypt,
   getEncryptionPublicKey,
@@ -49,7 +57,7 @@ describe('simple-keyring', function () {
       await keyring.deserialize([testAccount.key]);
       const serialized = await keyring.serialize();
       expect(serialized).toHaveLength(1);
-      expect(serialized[0]).toBe(ethUtil.stripHexPrefix(testAccount.key));
+      expect(serialized[0]).toBe(stripHexPrefix(testAccount.key));
     });
   });
 
@@ -127,9 +135,7 @@ describe('simple-keyring', function () {
     it('reliably can decode messages it signs', async function () {
       await keyring.deserialize([privateKey]);
       const localMessage = 'hello there!';
-      const msgHashHex = ethUtil.bufferToHex(
-        ethUtil.keccak(Buffer.from(localMessage)),
-      );
+      const msgHashHex = bufferToHex(keccak256(Buffer.from(localMessage)));
 
       await keyring.addAccounts(9);
       const addresses = await keyring.getAccounts();
@@ -141,14 +147,12 @@ describe('simple-keyring', function () {
       signatures.forEach((sgn, index) => {
         const accountAddress = addresses[index];
 
-        const r = ethUtil.toBuffer(sgn.slice(0, 66));
-        const s = ethUtil.toBuffer(`0x${sgn.slice(66, 130)}`);
-        const v = ethUtil.bufferToInt(
-          ethUtil.toBuffer(`0x${sgn.slice(130, 132)}`),
-        );
-        const m = ethUtil.toBuffer(msgHashHex);
-        const pub = ethUtil.ecrecover(m, v, r, s);
-        const adr = `0x${ethUtil.pubToAddress(pub).toString('hex')}`;
+        const r = toBuffer(sgn.slice(0, 66));
+        const s = toBuffer(`0x${sgn.slice(66, 130)}`);
+        const v = BigInt(`0x${sgn.slice(130, 132)}`);
+        const m = toBuffer(msgHashHex);
+        const pub = ecrecover(m, v, r, s);
+        const adr = `0x${pubToAddress(pub).toString('hex')}`;
 
         expect(adr).toBe(accountAddress);
       });
@@ -157,7 +161,7 @@ describe('simple-keyring', function () {
     it('throw error for invalid message', async function () {
       await keyring.deserialize([privateKey]);
       await expect(keyring.signMessage(address, '')).rejects.toThrow(
-        'Expected message to be an Uint8Array with length 32',
+        'Cannot convert 0x to a BigInt',
       );
     });
 
@@ -233,7 +237,7 @@ describe('simple-keyring', function () {
       '6969696969696969696969696969696969696969696969696969696969696969',
       'hex',
     );
-    const privKeyHex = ethUtil.bufferToHex(privateKey);
+    const privKeyHex = bufferToHex(privateKey);
     const message = '0x68656c6c6f20776f726c64';
     const expectedSignature =
       '0xce909e8ea6851bc36c007a0072d0524b07a3ff8d4e623aca4c71ca8e57250c4d0a3fc38fa8fbaaa81ead4b9f6bd03356b6f8bf18bccad167d78891636e1d69561b';
@@ -472,7 +476,7 @@ describe('simple-keyring', function () {
       '6969696969696969696969696969696969696969696969696969696969696969',
       'hex',
     );
-    const privKeyHex = ethUtil.bufferToHex(privateKey);
+    const privKeyHex = bufferToHex(privateKey);
     const message = 'Hello world!';
     const encryptedMessage = encrypt({
       publicKey: getEncryptionPublicKey(privateKey),
@@ -511,7 +515,7 @@ describe('simple-keyring', function () {
       'hex',
     );
     const publicKey = 'GxuMqoE2oHsZzcQtv/WMNB3gCH2P6uzynuwO1P0MM1U=';
-    const privKeyHex = ethUtil.bufferToHex(privateKey);
+    const privKeyHex = bufferToHex(privateKey);
 
     it('returns the expected value', async function () {
       await keyring.deserialize([privKeyHex]);
@@ -624,7 +628,7 @@ describe('simple-keyring', function () {
       );
 
       expect(address).not.toBe(appKeyAddress);
-      expect(ethUtil.isValidAddress(appKeyAddress)).toBe(true);
+      expect(isValidAddress(appKeyAddress)).toBe(true);
     });
 
     it('should return different addresses when provided different app key origins', async function () {
@@ -636,14 +640,14 @@ describe('simple-keyring', function () {
         'someapp.origin.io',
       );
 
-      expect(ethUtil.isValidAddress(appKeyAddress1)).toBe(true);
+      expect(isValidAddress(appKeyAddress1)).toBe(true);
 
       const appKeyAddress2 = await simpleKeyring.getAppKeyAddress(
         address,
         'anotherapp.origin.io',
       );
 
-      expect(ethUtil.isValidAddress(appKeyAddress2)).toBe(true);
+      expect(isValidAddress(appKeyAddress2)).toBe(true);
       expect(appKeyAddress1).not.toBe(appKeyAddress2);
     });
 
@@ -656,14 +660,14 @@ describe('simple-keyring', function () {
         'someapp.origin.io',
       );
 
-      expect(ethUtil.isValidAddress(appKeyAddress1)).toBe(true);
+      expect(isValidAddress(appKeyAddress1)).toBe(true);
 
       const appKeyAddress2 = await simpleKeyring.getAppKeyAddress(
         address,
         'someapp.origin.io',
       );
 
-      expect(ethUtil.isValidAddress(appKeyAddress2)).toBe(true);
+      expect(isValidAddress(appKeyAddress2)).toBe(true);
       expect(appKeyAddress1).toBe(appKeyAddress2);
     });
 

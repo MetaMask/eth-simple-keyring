@@ -1,6 +1,5 @@
 const { EventEmitter } = require('events');
 const {
-  toBuffer,
   isValidPrivate,
   stripHexPrefix,
   privateToPublic,
@@ -105,10 +104,7 @@ class SimpleKeyring extends EventEmitter {
   // For eth_decryptMessage:
   async decryptMessage(withAccount, encryptedData) {
     const wallet = this._getWalletForAccount(withAccount);
-    let { privateKey } = wallet;
-    if (typeof privateKey === 'string') {
-      privateKey = toBuffer(stripHexPrefix(wallet.privateKey));
-    }
+    const { privateKey } = wallet;
     const sig = decrypt({ privateKey, encryptedData });
     return sig;
   }

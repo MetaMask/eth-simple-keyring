@@ -1,5 +1,5 @@
 {
-  "name": "eth-simple-keyring",
+  "name": "@metamask/eth-simple-keyring",
   "version": "4.2.0",
   "description": "A simple standard interface for a series of Ethereum private keys.",
   "keywords": [
@@ -55,6 +55,10 @@
   },
   "engines": {
     "node": ">=14.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "lavamoat": {
     "allowScripts": {

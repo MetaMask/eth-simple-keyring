@@ -10,6 +10,7 @@ const {
 } = require('@ethereumjs/util');
 const randomBytes = require('randombytes');
 const { keccak256 } = require('ethereum-cryptography/keccak');
+const { Address } = require('micro-eth-signer');
 
 const type = 'Simple Key Pair';
 const {
@@ -183,8 +184,11 @@ class SimpleKeyring extends EventEmitter {
   _getWalletForAccount(account, opts = {}) {
     const address = normalize(account);
     let wallet = this._wallets.find(
-      ({ publicKey }) => bufferToHex(publicToAddress(publicKey)) === address,
+      ({ publicKey }) =>
+        bufferToHex(publicToAddress(publicKey)) === address ||
+        Address.fromPublicKey(publicKey).toLowerCase() === address,
     );
+
     if (!wallet) {
       throw new Error('Simple Keyring - Unable to find matching address.');
     }

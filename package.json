@@ -33,6 +33,7 @@
     "@ethereumjs/util": "^8.0.0",
     "@metamask/eth-sig-util": "^5.0.0",
     "ethereum-cryptography": "^1.1.2",
+    "micro-eth-signer": "0.4.8",
     "randombytes": "^2.1.0"
   },
   "devDependencies": {

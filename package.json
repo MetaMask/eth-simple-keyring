@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@ethereumjs/util": "^8.0.0",
-    "@metamask/eth-sig-util": "^5.0.0",
+    "@metamask/eth-sig-util": "^5.0.1",
     "ethereum-cryptography": "^1.1.2",
     "randombytes": "^2.1.0"
   },

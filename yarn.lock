@@ -762,27 +762,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lavamoat/allow-scripts@npm:^1.0.6":
-  version: 1.0.6
-  resolution: "@lavamoat/allow-scripts@npm:1.0.6"
+"@lavamoat/aa@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@lavamoat/aa@npm:3.1.0"
   dependencies:
-    "@lavamoat/preinstall-always-fail": ^1.0.0
-    "@npmcli/run-script": ^1.8.1
-    "@yarnpkg/lockfile": ^1.1.0
-    npm-logical-tree: ^1.2.1
     resolve: ^1.20.0
-    semver: ^7.3.4
-    yargs: ^16.2.0
   bin:
-    allow-scripts: src/cli.js
-  checksum: 6cf64f0d5c7330dff20f6c16943f524876550a54dcfb7ef6c51fa37cdd8349065b883f7a785c55cd372338a065de62adcfbb526b972926e3cd5ac743bd3a3255
+    lavamoat-ls: src/cli.js
+  checksum: ac7224ffc0ee548dec527f8a84f8bc653ac0972aede80b77dddf67a312aa15984a3ac59330c0117fb6b277f94b8dd89265d311d54f86cbb62654e6e1640a7039
   languageName: node
   linkType: hard
 
-"@lavamoat/preinstall-always-fail@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@lavamoat/preinstall-always-fail@npm:1.0.0"
-  checksum: 93af02b34c8a7d99296025fd2052272f26310b38998c07b39f698ba395a5543b450dea41d3a26005c83a634738e6f7de01a7cea0eb5552cfe83abe619c3e7b31
+"@lavamoat/allow-scripts@npm:2.1.0":
+  version: 2.1.0
+  resolution: "@lavamoat/allow-scripts@npm:2.1.0"
+  dependencies:
+    "@lavamoat/aa": ^3.1.0
+    "@npmcli/run-script": ^1.8.1
+    yargs: ^16.2.0
+  bin:
+    allow-scripts: src/cli.js
+  checksum: 5dc684bba469aedd85d3250f2177176f5abbf229aa6831f880458d8d929d713c5933cdee1282e19ce782808544309e78f89926503d08a58f637ac446ad5bd29d
   languageName: node
   linkType: hard
 
@@ -855,7 +855,7 @@ __metadata:
   dependencies:
     "@ethereumjs/tx": ^4.0.0
     "@ethereumjs/util": ^8.0.0
-    "@lavamoat/allow-scripts": ^1.0.6
+    "@lavamoat/allow-scripts": 2.1.0
     "@metamask/auto-changelog": ^3.0.0
     "@metamask/eslint-config": ^8.0.0
     "@metamask/eslint-config-jest": ^8.0.0
@@ -1253,13 +1253,6 @@ __metadata:
     "@typescript-eslint/types": 4.28.2
     eslint-visitor-keys: ^2.0.0
   checksum: 91610c6948c9ace009acd9b2894d194c977c5d15dab9a68f3f71090988c1d0b3442a60ad7119c865dbb5f36af50726e3245c86d557e01481feeda80e5f474687
-  languageName: node
-  linkType: hard
-
-"@yarnpkg/lockfile@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@yarnpkg/lockfile@npm:1.1.0"
-  checksum: 05b881b4866a3546861fee756e6d3812776ea47fa6eb7098f983d6d0eefa02e12b66c3fff931574120f196286a7ad4879ce02743c8bb2be36c6a576c7852083a
   languageName: node
   linkType: hard
 
@@ -4833,13 +4826,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"npm-logical-tree@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "npm-logical-tree@npm:1.2.1"
-  checksum: 2ccc81ab30653a25e8549310199fdfff1de93cd657e96f5d1571ae06eed685b4f3a9de8b740e7da067e5313ab848a7ccebb05715cd6777c21dc9203718835c20
-  languageName: node
-  linkType: hard
-
 "npm-normalize-package-bin@npm:^1.0.1":
   version: 1.0.1
   resolution: "npm-normalize-package-bin@npm:1.0.1"
@@ -5606,7 +5592,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.2.1, semver@npm:^7.3.2, semver@npm:^7.3.4, semver@npm:^7.3.5":
+"semver@npm:^7.2.1, semver@npm:^7.3.2, semver@npm:^7.3.5":
   version: 7.3.5
   resolution: "semver@npm:7.3.5"
   dependencies:

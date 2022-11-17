@@ -773,7 +773,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lavamoat/allow-scripts@npm:2.1.0":
+"@lavamoat/allow-scripts@npm:^2.1.0":
   version: 2.1.0
   resolution: "@lavamoat/allow-scripts@npm:2.1.0"
   dependencies:
@@ -855,7 +855,7 @@ __metadata:
   dependencies:
     "@ethereumjs/tx": ^4.0.0
     "@ethereumjs/util": ^8.0.0
-    "@lavamoat/allow-scripts": 2.1.0
+    "@lavamoat/allow-scripts": ^2.1.0
     "@metamask/auto-changelog": ^3.0.0
     "@metamask/eslint-config": ^8.0.0
     "@metamask/eslint-config-jest": ^8.0.0

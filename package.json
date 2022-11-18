@@ -21,7 +21,6 @@
     "index.js"
   ],
   "scripts": {
-    "setup": "yarn install",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint:eslint": "eslint . --cache --ext js,ts",

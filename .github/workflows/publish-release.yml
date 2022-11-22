@@ -1,8 +1,10 @@
 name: Publish Release
 
 on:
-  push:
-    branches: [main]
+  workflow_call:
+    secrets:
+      NPM_TOKEN:
+        required: true
 
 jobs:
   is-release:

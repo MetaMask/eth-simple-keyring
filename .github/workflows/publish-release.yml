@@ -22,17 +22,6 @@ jobs:
       - uses: MetaMask/action-publish-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Install
-        run: |
-          yarn install
-          yarn build
-      - uses: actions/cache@v3
-        id: restore-build
-        with:
-          path: |
-            ./dist
-            ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
 
   publish-npm-dry-run:
     runs-on: ubuntu-latest
@@ -41,13 +30,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.sha }}
-      - uses: actions/cache@v3
-        id: restore-build
-        with:
-          path: |
-            ./dist
-            ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
       - name: Dry Run Publish
         # omit npm-token token to perform dry run publish
         uses: MetaMask/action-npm-publish@v2
@@ -62,13 +44,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.sha }}
-      - uses: actions/cache@v3
-        id: restore-build
-        with:
-          path: |
-            ./dist
-            ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
       - name: Publish
         uses: MetaMask/action-npm-publish@v2
         with:

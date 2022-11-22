@@ -858,8 +858,8 @@ __metadata:
     "@lavamoat/allow-scripts": ^2.1.0
     "@metamask/auto-changelog": ^3.0.0
     "@metamask/eslint-config": ^8.0.0
-    "@metamask/eslint-config-nodejs": ^11.0.1
     "@metamask/eslint-config-jest": ^11.0.0
+    "@metamask/eslint-config-nodejs": ^11.0.1
     "@metamask/eth-sig-util": ^5.0.1
     "@types/jest": ^26.0.24
     eslint: ^7.30.0

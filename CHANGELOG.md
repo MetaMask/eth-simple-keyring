@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Consumers should not use this property as it is intended for internal use only.
 - **BREAKING:** Makes `getPrivateKeyFor` a private method ([#83](https://github.com/MetaMask/eth-simple-keyring/pull/83))
     - Consumers who wish to get the private key for a given account should use the `exportAccount` method.
-- **BREAKING:** Bumps minimum node version required from 10 to 12 ([#68](https://github.com/MetaMask/eth-simple-keyring/pull/68))
+- **BREAKING:** Set the minimum Node.js version to 12 ([#68](https://github.com/MetaMask/eth-simple-keyring/pull/68))
 
 ### Removed
 - **BREAKING:** Remove redundant `newGethSignMessage` method ([#72](https://github.com/MetaMask/eth-simple-keyring/pull/72))

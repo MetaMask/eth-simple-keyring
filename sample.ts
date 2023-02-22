@@ -1,8 +1,9 @@
-const SimpleKeyring = require('.');
+import SimpleKeyring from '.';
 
-const keyring = new SimpleKeyring();
+const keyring = new SimpleKeyring(undefined);
 
-let accounts = [];
+let accounts: any[] = [];
+
 keyring
   .addAccounts(37)
   .then((newAddresses) => {
@@ -12,7 +13,7 @@ keyring
     return keyring.serialize();
   })
   .then((privateKeys) => {
-    privateKeys.forEach((privateKey, index) => {
+    privateKeys.forEach((privateKey: any, index: number) => {
       accounts[index].privateKey = privateKey;
     });
   })

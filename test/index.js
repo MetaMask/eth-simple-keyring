@@ -1,4 +1,8 @@
 const {
+  TransactionFactory,
+  Transaction: EthereumTx,
+} = require('@ethereumjs/tx');
+const {
   stripHexPrefix,
   bufferToHex,
   toBuffer,
@@ -6,7 +10,6 @@ const {
   pubToAddress,
   isValidAddress,
 } = require('@ethereumjs/util');
-const { keccak256 } = require('ethereum-cryptography/keccak');
 const {
   encrypt,
   getEncryptionPublicKey,
@@ -16,10 +19,8 @@ const {
   signTypedData,
   SignTypedDataVersion,
 } = require('@metamask/eth-sig-util');
-const {
-  TransactionFactory,
-  Transaction: EthereumTx,
-} = require('@ethereumjs/tx');
+const { keccak256 } = require('ethereum-cryptography/keccak');
+
 const SimpleKeyring = require('..');
 
 const TYPE_STR = 'Simple Key Pair';
@@ -147,10 +148,13 @@ describe('simple-keyring', function () {
       signatures.forEach((sgn, index) => {
         const accountAddress = addresses[index];
 
+        /* eslint-disable id-length */
         const r = toBuffer(sgn.slice(0, 66));
         const s = toBuffer(`0x${sgn.slice(66, 130)}`);
         const v = BigInt(`0x${sgn.slice(130, 132)}`);
         const m = toBuffer(msgHashHex);
+        /* eslint-enable id-length */
+
         const pub = ecrecover(m, v, r, s);
         const adr = `0x${pubToAddress(pub).toString('hex')}`;
 

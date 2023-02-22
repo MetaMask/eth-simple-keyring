@@ -1,5 +1,5 @@
-const { EventEmitter } = require('events');
-const {
+import { EventEmitter } from 'events';
+import {
   isValidPrivate,
   stripHexPrefix,
   privateToPublic,
@@ -7,12 +7,13 @@ const {
   publicToAddress,
   ecsign,
   arrToBufArr,
-} = require('@ethereumjs/util');
-const randomBytes = require('randombytes');
-const { keccak256 } = require('ethereum-cryptography/keccak');
+  toBuffer,
+} from '@ethereumjs/util';
+import randomBytes from 'randombytes';
+import { keccak256 } from 'ethereum-cryptography/keccak';
 
 const type = 'Simple Key Pair';
-const {
+import {
   concatSig,
   decrypt,
   getEncryptionPublicKey,
@@ -20,9 +21,9 @@ const {
   personalSign,
   signTypedData,
   SignTypedDataVersion,
-} = require('@metamask/eth-sig-util');
+} from '@metamask/eth-sig-util';
 
-function generateKey() {
+function generateKey(): Buffer {
   const privateKey = randomBytes(32);
   // I don't think this is possible, but this validation was here previously,
   // so it has been preserved just in case.
@@ -35,8 +36,11 @@ function generateKey() {
   return privateKey;
 }
 
-class SimpleKeyring extends EventEmitter {
-  constructor(opts) {
+export default class SimpleKeyring extends EventEmitter {
+  private _wallets: { privateKey: Buffer; publicKey: Buffer }[];
+  type: string;
+
+  constructor(opts: [] | undefined) {
     super();
     this.type = type;
     this._wallets = [];
@@ -44,7 +48,7 @@ class SimpleKeyring extends EventEmitter {
   }
 
   async serialize() {
-    return this._wallets.map(({ privateKey }) => privateKey.toString('hex'));
+    return this._wallets.map((a) => a.privateKey.toString('hex'));
   }
 
   async deserialize(privateKeys = []) {
@@ -77,7 +81,11 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // tx is an instance of the ethereumjs-transaction class.
-  async signTransaction(address, tx, opts = {}) {
+  async signTransaction(
+    address: any,
+    tx: { sign: (arg0: any) => any },
+    opts = { withAppKeyOrigin: '' },
+  ) {
     const privKey = this._getPrivateKeyFor(address, opts);
     const signedTx = tx.sign(privKey);
     // Newer versions of Ethereumjs-tx are immutable and return a new tx object
@@ -85,34 +93,44 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // For eth_sign, we need to sign arbitrary data:
-  async signMessage(address, data, opts = {}) {
+  async signMessage(
+    address: any,
+    data: string,
+    opts = { withAppKeyOrigin: '' },
+  ) {
     const message = stripHexPrefix(data);
     const privKey = this._getPrivateKeyFor(address, opts);
     const msgSig = ecsign(Buffer.from(message, 'hex'), privKey);
-    const rawMsgSig = concatSig(msgSig.v, msgSig.r, msgSig.s);
+    const rawMsgSig = concatSig(toBuffer(msgSig.v), msgSig.r, msgSig.s);
     return rawMsgSig;
   }
 
   // For personal_sign, we need to prefix the message:
-  async signPersonalMessage(address, msgHex, opts = {}) {
+  async signPersonalMessage(
+    address: any,
+    msgHex: any,
+    opts = { withAppKeyOrigin: '' },
+  ) {
     const privKey = this._getPrivateKeyFor(address, opts);
-    const privateKey = Buffer.from(privKey, 'hex');
-    const sig = personalSign({ privateKey, data: msgHex });
+    // const privateKey = Buffer.from(privKey, 'hex');
+    const sig = personalSign({ privateKey: privKey, data: msgHex });
     return sig;
   }
 
   // For eth_decryptMessage:
-  async decryptMessage(withAccount, encryptedData) {
-    const wallet = this._getWalletForAccount(withAccount);
-    const { privateKey } = wallet;
+  async decryptMessage(withAccount: any, encryptedData: any) {
+    const wallet = this._getWalletForAccount(withAccount, {
+      withAppKeyOrigin: '',
+    });
+    const privateKey = wallet.privateKey.toString();
     const sig = decrypt({ privateKey, encryptedData });
     return sig;
   }
 
   // personal_signTypedData, signs data along with the schema
   async signTypedData(
-    withAccount,
-    typedData,
+    withAccount: any,
+    typedData: any,
     opts = { version: SignTypedDataVersion.V1 },
   ) {
     // Treat invalid versions as "V1"
@@ -120,18 +138,21 @@ class SimpleKeyring extends EventEmitter {
       ? opts.version
       : SignTypedDataVersion.V1;
 
-    const privateKey = this._getPrivateKeyFor(withAccount, opts);
+    const privateKey = this._getPrivateKeyFor(withAccount);
     return signTypedData({ privateKey, data: typedData, version });
   }
 
   // get public key for nacl
-  async getEncryptionPublicKey(withAccount, opts = {}) {
+  async getEncryptionPublicKey(
+    withAccount: any,
+    opts = { withAppKeyOrigin: '' },
+  ) {
     const privKey = this._getPrivateKeyFor(withAccount, opts);
-    const publicKey = getEncryptionPublicKey(privKey);
+    const publicKey = getEncryptionPublicKey(privKey.toString());
     return publicKey;
   }
 
-  _getPrivateKeyFor(address, opts = {}) {
+  _getPrivateKeyFor(address: any, opts = { withAppKeyOrigin: '' }) {
     if (!address) {
       throw new Error('Must specify address.');
     }
@@ -140,7 +161,7 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // returns an address specific to an app
-  async getAppKeyAddress(address, origin) {
+  async getAppKeyAddress(address: any, origin: any) {
     if (!origin || typeof origin !== 'string') {
       throw new Error(`'origin' must be a non-empty string`);
     }
@@ -154,12 +175,12 @@ class SimpleKeyring extends EventEmitter {
   }
 
   // exportAccount should return a hex-encoded private key:
-  async exportAccount(address, opts = {}) {
+  async exportAccount(address: any, opts = { withAppKeyOrigin: '' }) {
     const wallet = this._getWalletForAccount(address, opts);
     return wallet.privateKey.toString('hex');
   }
 
-  removeAccount(address) {
+  removeAccount(address: string) {
     if (
       !this._wallets
         .map(({ publicKey }) =>
@@ -180,7 +201,10 @@ class SimpleKeyring extends EventEmitter {
   /**
    * @private
    */
-  _getWalletForAccount(account, opts = {}) {
+  _getWalletForAccount(
+    account: string | number,
+    opts: { withAppKeyOrigin: string },
+  ) {
     const address = normalize(account);
     let wallet = this._wallets.find(
       ({ publicKey }) => bufferToHex(publicToAddress(publicKey)) === address,
@@ -193,7 +217,7 @@ class SimpleKeyring extends EventEmitter {
       const { privateKey } = wallet;
       const appKeyOriginBuffer = Buffer.from(opts.withAppKeyOrigin, 'utf8');
       const appKeyBuffer = Buffer.concat([privateKey, appKeyOriginBuffer]);
-      const appKeyPrivateKey = arrToBufArr(keccak256(appKeyBuffer, 256));
+      const appKeyPrivateKey = arrToBufArr(keccak256(appKeyBuffer));
       const appKeyPublicKey = privateToPublic(appKeyPrivateKey);
       wallet = { privateKey: appKeyPrivateKey, publicKey: appKeyPublicKey };
     }
@@ -201,6 +225,3 @@ class SimpleKeyring extends EventEmitter {
     return wallet;
   }
 }
-
-SimpleKeyring.type = type;
-module.exports = SimpleKeyring;

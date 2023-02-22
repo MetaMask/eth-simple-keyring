@@ -114,7 +114,7 @@ export default class SimpleKeyring
 
   // For eth_sign, we need to sign arbitrary data:
   async signMessage(
-    address: any,
+    address: Hex,
     data: string,
     opts = { withAppKeyOrigin: '' },
   ) {

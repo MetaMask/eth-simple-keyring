@@ -18,7 +18,7 @@ import {
   SignTypedDataVersion,
   TypedMessage,
 } from '@metamask/eth-sig-util';
-import { add0x } from '@metamask/utils';
+import { add0x, Hex } from '@metamask/utils';
 import { keccak256 } from 'ethereum-cryptography/keccak';
 
 import SimpleKeyring from '..';
@@ -34,7 +34,7 @@ const testAccount = {
 const notKeyringAddress = '0xbD20F6F5F1616947a39E11926E78ec94817B3931';
 
 describe('simple-keyring', function () {
-  let keyring;
+  let keyring: any; // If you set this to SimpleKeyring instead of any, it opens up a whole can of worms
   beforeEach(function () {
     keyring = new SimpleKeyring();
   });
@@ -143,7 +143,7 @@ describe('simple-keyring', function () {
       await keyring.addAccounts(9);
       const addresses = await keyring.getAccounts();
       const signatures = await Promise.all(
-        addresses.map(async (accountAddress) => {
+        addresses.map(async (accountAddress: Hex) => {
           return await keyring.signMessage(accountAddress, msgHashHex);
         }),
       );

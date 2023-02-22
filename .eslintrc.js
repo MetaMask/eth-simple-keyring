@@ -6,12 +6,13 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['test/**/*.js'],
+      files: ['test/**/*.ts'],
       extends: ['@metamask/eslint-config-jest'],
     },
   ],
   rules: {
     'prettier/prettier': ['error', { endOfLine: 'auto' }],
+    'node/no-unpublished-import': 0,
     camelcase: [
       'error',
       {
@@ -19,4 +20,9 @@ module.exports = {
       },
     ],
   },
+  parserOptions: {
+    sourceType: 'module',
+  },
+  ignorePatterns: ['.eslintrc.js'],
+  parser: '@typescript-eslint/parser',
 };

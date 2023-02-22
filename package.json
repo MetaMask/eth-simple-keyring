@@ -21,17 +21,18 @@
     "index.ts"
   ],
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "lint:eslint": "eslint . --cache --ext js,ts",
-    "lint:misc": "prettier '**/*.json' '**/*.md' '!CHANGELOG.md' '**/*.yml' '!.yarnrc.yml' --ignore-path .gitignore --no-error-on-unmatched-pattern",
     "lint": "yarn lint:eslint && yarn lint:misc --check",
+    "lint:eslint": "eslint . --cache --ext js,ts",
     "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
-    "sample": "ts-node ./sample.ts"
+    "lint:misc": "prettier '**/*.json' '**/*.md' '!CHANGELOG.md' '**/*.yml' '!.yarnrc.yml' --ignore-path .gitignore --no-error-on-unmatched-pattern",
+    "sample": "ts-node ./sample.ts",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@ethereumjs/util": "^8.0.3",
     "@metamask/eth-sig-util": "^5.0.2",
+    "@metamask/utils": "^4.0.0",
     "ethereum-cryptography": "^1.2.0",
     "randombytes": "^2.1.0"
   },
@@ -44,6 +45,7 @@
     "@metamask/eslint-config-nodejs": "^11.1.0",
     "@types/jest": "^29.4.0",
     "@types/randombytes": "^2.0.0",
+    "@typescript-eslint/parser": "^5.53.0",
     "eslint": "^8.34.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-import": "^2.27.5",
@@ -53,9 +55,11 @@
     "jest": "^29.4.3",
     "prettier": "^2.8.4",
     "prettier-plugin-packagejson": "^2.4.3",
+    "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5"
   },
+  "packageManager": "yarn@3.3.0",
   "engines": {
     "node": ">=14.0.0"
   },
@@ -69,6 +73,5 @@
       "secp256k1": true,
       "@lavamoat/preinstall-always-fail": false
     }
-  },
-  "packageManager": "yarn@3.3.0"
+  }
 }

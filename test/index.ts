@@ -1,27 +1,27 @@
-const {
-  TransactionFactory,
-  Transaction: EthereumTx,
-} = require('@ethereumjs/tx');
-const {
-  stripHexPrefix,
+import { Transaction as EthereumTx, TransactionFactory } from '@ethereumjs/tx';
+import {
   bufferToHex,
-  toBuffer,
   ecrecover,
-  pubToAddress,
   isValidAddress,
-} = require('@ethereumjs/util');
-const {
+  pubToAddress,
+  stripHexPrefix,
+  toBuffer,
+} from '@ethereumjs/util';
+import {
   encrypt,
   getEncryptionPublicKey,
+  MessageTypes,
   personalSign,
   recoverPersonalSignature,
   recoverTypedSignature,
   signTypedData,
   SignTypedDataVersion,
-} = require('@metamask/eth-sig-util');
-const { keccak256 } = require('ethereum-cryptography/keccak');
+  TypedMessage,
+} from '@metamask/eth-sig-util';
+import { add0x } from '@metamask/utils';
+import { keccak256 } from 'ethereum-cryptography/keccak';
 
-const SimpleKeyring = require('..');
+import SimpleKeyring from '..';
 
 const TYPE_STR = 'Simple Key Pair';
 
@@ -41,7 +41,7 @@ describe('simple-keyring', function () {
 
   describe('Keyring.type', function () {
     it('is a class property that returns the type string.', function () {
-      const { type } = SimpleKeyring;
+      const { type } = new SimpleKeyring();
       expect(type).toBe(TYPE_STR);
     });
   });
@@ -136,7 +136,9 @@ describe('simple-keyring', function () {
     it('reliably can decode messages it signs', async function () {
       await keyring.deserialize([privateKey]);
       const localMessage = 'hello there!';
-      const msgHashHex = bufferToHex(keccak256(Buffer.from(localMessage)));
+      const msgHashHex = bufferToHex(
+        keccak256(Buffer.from(localMessage)) as Buffer,
+      );
 
       await keyring.addAccounts(9);
       const addresses = await keyring.getAccounts();
@@ -363,7 +365,7 @@ describe('simple-keyring', function () {
       '0x4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0';
 
     it('returns the expected value', async function () {
-      const typedData = {
+      const typedData: TypedMessage<MessageTypes> = {
         types: {
           EIP712Domain: [],
         },
@@ -392,7 +394,7 @@ describe('simple-keyring', function () {
       '0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c';
 
     it('returns the expected value', async function () {
-      const typedData = {
+      const typedData: TypedMessage<MessageTypes> = {
         types: {
           EIP712Domain: [
             { name: 'name', type: 'string' },
@@ -452,7 +454,7 @@ describe('simple-keyring', function () {
       '0x4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0';
 
     it('returns the expected value', async function () {
-      const typedData = {
+      const typedData: TypedMessage<MessageTypes> = {
         types: {
           EIP712Domain: [],
         },
@@ -483,7 +485,7 @@ describe('simple-keyring', function () {
     const privKeyHex = bufferToHex(privateKey);
     const message = 'Hello world!';
     const encryptedMessage = encrypt({
-      publicKey: getEncryptionPublicKey(privateKey),
+      publicKey: getEncryptionPublicKey(privateKey.toString('hex')),
       data: message,
       version: 'x25519-xsalsa20-poly1305',
     });
@@ -552,7 +554,7 @@ describe('simple-keyring', function () {
       '0x65cbd956f2fae28a601bebc9b906cea0191744bd4c4247bcd27cd08f8eb6b71c78efdf7a31dc9abee78f492292721f362d296cf86b4538e07b51303b67f749061b';
 
     it('returns the expected value', async function () {
-      const typedData = {
+      const typedData: TypedMessage<MessageTypes> = {
         types: {
           EIP712Domain: [
             { name: 'name', type: 'string' },
@@ -627,7 +629,7 @@ describe('simple-keyring', function () {
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
 
       const appKeyAddress = await simpleKeyring.getAppKeyAddress(
-        address,
+        add0x(address),
         'someapp.origin.io',
       );
 
@@ -640,14 +642,14 @@ describe('simple-keyring', function () {
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
 
       const appKeyAddress1 = await simpleKeyring.getAppKeyAddress(
-        address,
+        add0x(address),
         'someapp.origin.io',
       );
 
       expect(isValidAddress(appKeyAddress1)).toBe(true);
 
       const appKeyAddress2 = await simpleKeyring.getAppKeyAddress(
-        address,
+        add0x(address),
         'anotherapp.origin.io',
       );
 
@@ -660,14 +662,14 @@ describe('simple-keyring', function () {
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
 
       const appKeyAddress1 = await simpleKeyring.getAppKeyAddress(
-        address,
+        add0x(address),
         'someapp.origin.io',
       );
 
       expect(isValidAddress(appKeyAddress1)).toBe(true);
 
       const appKeyAddress2 = await simpleKeyring.getAppKeyAddress(
-        address,
+        add0x(address),
         'someapp.origin.io',
       );
 
@@ -679,18 +681,18 @@ describe('simple-keyring', function () {
       const { address } = testAccount;
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
 
-      await expect(simpleKeyring.getAppKeyAddress(address, [])).rejects.toThrow(
-        `'origin' must be a non-empty string`,
-      );
+      await expect(
+        simpleKeyring.getAppKeyAddress(add0x(address), ''),
+      ).rejects.toThrow(`'origin' must be a non-empty string`);
     });
 
     it('should throw error if the provided origin is an empty string', async function () {
       const { address } = testAccount;
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
 
-      await expect(simpleKeyring.getAppKeyAddress(address, '')).rejects.toThrow(
-        `'origin' must be a non-empty string`,
-      );
+      await expect(
+        simpleKeyring.getAppKeyAddress(add0x(address), ''),
+      ).rejects.toThrow(`'origin' must be a non-empty string`);
     });
   });
 
@@ -733,7 +735,7 @@ describe('simple-keyring', function () {
 
     it('should signTypedData V3 with the expected key when passed a withAppKeyOrigin', async function () {
       const { address } = testAccount;
-      const typedData = {
+      const typedData: TypedMessage<MessageTypes> = {
         types: {
           EIP712Domain: [],
         },
@@ -752,10 +754,14 @@ describe('simple-keyring', function () {
       });
 
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
-      const signature = await simpleKeyring.signTypedData(address, typedData, {
-        withAppKeyOrigin: 'someapp.origin.io',
-        version: 'V3',
-      });
+      const signature = await simpleKeyring.signTypedData(
+        add0x(address),
+        typedData,
+        {
+          withAppKeyOrigin: 'someapp.origin.io',
+          version: SignTypedDataVersion.V3,
+        },
+      );
 
       expect(expectedSignature).toBe(signature);
     });

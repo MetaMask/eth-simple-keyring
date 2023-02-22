@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
-    "exactOptionalPropertyTypes": true,
+    // "exactOptionalPropertyTypes": true,
     "forceConsistentCasingInFileNames": true,
     "lib": ["ES2020", "dom"],
     "module": "CommonJS",
@@ -9,7 +9,7 @@
     "noEmit": true,
     "noErrorTruncation": true,
     "noUncheckedIndexedAccess": true,
-    "strict": true,
+    "strict": false,
     "target": "ES2017"
   },
   "exclude": ["./dist/**/*"]

@@ -700,7 +700,7 @@ describe('simple-keyring', function () {
     it('should return a hex-encoded private key', async function () {
       const { address } = testAccount;
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
-      const privKeyHexValue = await simpleKeyring.exportAccount(address);
+      const privKeyHexValue = await simpleKeyring.exportAccount(add0x(address));
       expect(testAccount.key).toBe(`0x${privKeyHexValue}`);
     });
 
@@ -723,7 +723,7 @@ describe('simple-keyring', function () {
 
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
       const signature = await simpleKeyring.signPersonalMessage(
-        address,
+        add0x(address),
         message,
         {
           withAppKeyOrigin: 'someapp.origin.io',

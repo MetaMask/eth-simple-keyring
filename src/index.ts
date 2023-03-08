@@ -1,4 +1,4 @@
-import { Transaction as TxTransaction } from '@ethereumjs/tx';
+import { Transaction, TxData, TypedTransaction } from '@ethereumjs/tx';
 import {
   arrToBufArr,
   bufferToHex,
@@ -7,7 +7,7 @@ import {
   privateToPublic,
   publicToAddress,
   stripHexPrefix,
-  toBuffer,
+  toBuffer
 } from '@ethereumjs/util';
 import {
   concatSig,
@@ -16,21 +16,24 @@ import {
   normalize,
   personalSign,
   signTypedData,
-  SignTypedDataVersion,
+  SignTypedDataVersion
 } from '@metamask/eth-sig-util';
 import {
   add0x,
   Eip1024EncryptedData,
   Hex,
   Keyring,
-  SignedTransaction,
-  Transaction,
 } from '@metamask/utils';
 import { keccak256 } from 'ethereum-cryptography/keccak';
 import { EventEmitter } from 'events';
-import randomBytes from 'randombytes';
+const randombytes = require("randombytes");
 
 const _TYPE = 'Simple Key Pair';
+
+export type KeyringSignDataOpts = {
+  withAppKeyOrigin?: string;
+  version?: SignTypedDataVersion;
+};
 
 /**
  * Temporary doc.
@@ -38,7 +41,7 @@ const _TYPE = 'Simple Key Pair';
  * @returns {Buffer} PrivateKey here.
  */
 function generateKey(): Buffer {
-  const privateKey = randomBytes(32);
+  const privateKey = randombytes(32);
   // I don't think this is possible, but this validation was here previously,
   // so it has been preserved just in case.
   // istanbul ignore next
@@ -56,20 +59,20 @@ export default class SimpleKeyring
 {
   private wallets: { privateKey: Buffer; publicKey: Buffer }[];
 
-  public type: string;
+  public type: string = _TYPE;
+  static type: string = _TYPE;
 
-  constructor(options: string[] = []) {
+  constructor(options?: Record<string, unknown>) {
     super();
-    this.type = _TYPE;
     this.wallets = [];
-    this.deserialize(options);
+    this.deserialize(options as unknown as string[]);
   }
 
   async serialize() {
     return this.wallets.map((a) => a.privateKey.toString('hex'));
   }
 
-  async deserialize(privateKeys: string[] = []) {
+  async deserialize(privateKeys: string[]) {
     this.wallets = privateKeys.map((hexPrivateKey) => {
       const strippedHexPrivateKey = stripHexPrefix(hexPrivateKey);
       const privateKey = Buffer.from(strippedHexPrivateKey, 'hex');
@@ -98,18 +101,29 @@ export default class SimpleKeyring
     );
   }
 
-  // tx is an instance of the ethereumjs-transaction class.
+  // async signTransaction(
+  //   address: Hex,
+  //   transaction: Transaction,
+  //   options?: Record<string, string>): Promise<TxData>
+  //  {
+  //   const privKey = this.getPrivateKeyFor(address, options);
+  //   const signedTx = transaction.sign(privKey);
+  //   // Newer versions of Ethereumjs-tx are immutable and return a new tx object
+  //   return signedTx === undefined
+  //     ? (transaction as SignedTransaction)
+  //     : (signedTx as unknown as SignedTransaction);
+  // }
+
   async signTransaction(
     address: Hex,
-    tx: Transaction,
-    options = { withAppKeyOrigin: '' },
-  ) {
+    transaction: TypedTransaction,
+    options: Record<string, unknown> = {},
+  ): Promise<TxData> {
     const privKey = this.getPrivateKeyFor(address, options);
-    const signedTx = (tx as unknown as TxTransaction).sign(privKey);
+    const tx = transaction as unknown as Transaction
+    const signedTx = tx.sign(privKey as Buffer);
     // Newer versions of Ethereumjs-tx are immutable and return a new tx object
-    return signedTx === undefined
-      ? (tx as SignedTransaction)
-      : (signedTx as unknown as SignedTransaction);
+    return signedTx === undefined ? tx : signedTx;
   }
 
   // For eth_sign, we need to sign arbitrary data:
@@ -127,8 +141,8 @@ export default class SimpleKeyring
 
   // For personal_sign, we need to prefix the message:
   async signPersonalMessage(
-    address: any,
-    msgHex: any,
+    address: Hex,
+    msgHex: Hex,
     opts = { withAppKeyOrigin: '' },
   ) {
     const privKey = this.getPrivateKeyFor(address, opts);
@@ -169,12 +183,12 @@ export default class SimpleKeyring
 
   private getPrivateKeyFor(
     address: Hex,
-    opts: Record<string, string> = { withAppKeyOrigin: '' },
+    options: Record<string, unknown> = { withAppKeyOrigin: '' },
   ) {
     if (!address) {
       throw new Error('Must specify address.');
     }
-    const wallet = this.getWalletForAccount(address, opts);
+    const wallet = this.getWalletForAccount(address, options);
     return wallet.privateKey;
   }
 
@@ -191,7 +205,7 @@ export default class SimpleKeyring
   }
 
   // exportAccount should return a hex-encoded private key:
-  async exportAccount(address: any, opts = { withAppKeyOrigin: '' }) {
+  async exportAccount(address: Hex, opts = { withAppKeyOrigin: '' }) {
     const wallet = this.getWalletForAccount(address, opts);
     return wallet.privateKey.toString('hex');
   }
@@ -216,7 +230,7 @@ export default class SimpleKeyring
 
   private getWalletForAccount(
     account: string | number,
-    opts: Record<string, string> = {},
+    opts: Record<string, unknown> = {},
   ) {
     const address = normalize(account);
     let wallet = this.wallets.find(
@@ -228,7 +242,7 @@ export default class SimpleKeyring
 
     if (opts.withAppKeyOrigin) {
       const { privateKey } = wallet;
-      const appKeyOriginBuffer = Buffer.from(opts.withAppKeyOrigin, 'utf8');
+      const appKeyOriginBuffer = Buffer.from(opts.withAppKeyOrigin as string, 'utf8');
       const appKeyBuffer = Buffer.concat([privateKey, appKeyOriginBuffer]);
       const appKeyPrivateKey = arrToBufArr(keccak256(appKeyBuffer));
       const appKeyPublicKey = privateToPublic(appKeyPrivateKey);
@@ -239,11 +253,12 @@ export default class SimpleKeyring
   }
 }
 
+// SimpleKeyring.type = _TYPE;
+
 // export class SimpleKeyringClass implements KeyringClass<string[]> {
 //   type: string = _TYPE;
 
-//   new(options: string[]): Keyring<string[]> {
-//     return new SimpleKeyring(options);
+//   new (options?: Record<string, unknown>): Keyring<string[]> {
+//     return new SimpleKeyring(['hello']);
 //   }
-
 // }

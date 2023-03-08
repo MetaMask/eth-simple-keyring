@@ -14,30 +14,34 @@
     "type": "git",
     "url": "https://github.com/MetaMask/eth-simple-keyring.git"
   },
-  "license": "ISC",
-  "author": "Dan Finlay",
-  "main": "index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "index.ts"
+    "dist/"
   ],
   "scripts": {
-    "lint": "yarn lint:eslint && yarn lint:misc --check",
+    "build": "tsc --project tsconfig.build.json",
+    "build:clean": "rimraf dist && yarn build",
+    "build:docs": "typedoc",
+    "lint": "yarn lint:eslint && yarn lint:misc --check && yarn lint:dependencies",
+    "lint:dependencies": "depcheck",
     "lint:eslint": "eslint . --cache --ext js,ts",
-    "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
+    "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write && yarn lint:dependencies",
     "lint:misc": "prettier '**/*.json' '**/*.md' '!CHANGELOG.md' '**/*.yml' '!.yarnrc.yml' --ignore-path .gitignore --no-error-on-unmatched-pattern",
+    "prepack": "./scripts/prepack.sh",
     "sample": "ts-node ./sample.ts",
-    "test": "jest",
+    "test": "jest && jest-it-up",
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@ethereumjs/util": "^8.0.3",
+    "@ethereumjs/util": "^8.0.5",
     "@metamask/eth-sig-util": "^5.0.2",
-    "@metamask/utils": "^4.0.0",
+    "@metamask/utils": "portal:../utils",
     "ethereum-cryptography": "^1.2.0",
     "randombytes": "^2.1.0"
   },
   "devDependencies": {
-    "@ethereumjs/tx": "^4.0.2",
+    "@ethereumjs/tx": "^4.1.1",
     "@lavamoat/allow-scripts": "^2.3.0",
     "@metamask/auto-changelog": "^3.1.0",
     "@metamask/eslint-config": "^11.1.0",
@@ -45,7 +49,7 @@
     "@metamask/eslint-config-nodejs": "^11.1.0",
     "@types/jest": "^29.4.0",
     "@types/randombytes": "^2.0.0",
-    "@typescript-eslint/parser": "^5.53.0",
+    "@typescript-eslint/parser": "^5.54.0",
     "eslint": "^8.34.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-import": "^2.27.5",
@@ -73,5 +77,8 @@
       "secp256k1": true,
       "@lavamoat/preinstall-always-fail": false
     }
+  },
+  "resolutions": {
+    "@metamask/utils": "portal:../utils"
   }
 }

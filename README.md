@@ -1,87 +1,48 @@
-# Simple Keyring
+# MetaMask Module Template
 
-A simple JS class wrapped around [ethereumjs-wallet](https://github.com/ethereumjs/ethereumjs-wallet) designed to expose an interface common to many different signing strategies to be used in a `KeyringController`; such as the one used in [MetaMask](https://metamask.io/)
+This TypeScript module is maintained in the style of the MetaMask team.
 
-## The Keyring Class Protocol
+## Template Instructions
 
-One of the goals of this class is to allow developers to easily add new signing strategies to MetaMask. We call these signing strategies Keyrings, because they can manage multiple keys.
+Follow these instructions when using this template.
 
-### Keyring.type
+- Update the package name, referenced in the following places:
+  - The `name` field of `package.json`
+  - The README title
+  - The README "Usage" section
+- Update the package description
+  - The package description is referenced at the beginning of the README, and in the `description` field of `package.json`.
+- Update the repository URL, referenced in the following places:
+  - `repository` field of `package.json`
+  - The links in the API section of the README
+- Update the pull request template (`.github/pull_request_template.md`) to remove the `Examples` section that is specific to this template.
+- Update the README "Usage" section, or remove it if it's not needed.
+- Delete these instructions.
 
-A class property that returns a unique string describing the Keyring.
-This is the only class property or method, the remaining methods are instance methods.
+## Installation
 
-### constructor( options )
+`yarn add @metamask/this-module`
 
-As a Javascript class, your Keyring object will be used to instantiate new Keyring instances using the new keyword. For example:
+or
 
-```
-const keyring = new YourKeyringClass(options);
-```
+`npm install @metamask/this-module`
 
-The constructor currently receives an options object that will be defined by your keyring-building UI, once the user has gone through the steps required for you to fully instantiate a new keyring. For example, choosing a pattern for a vanity account, or entering a seed phrase.
+## Usage
 
-We haven't defined the protocol for this account-generating UI yet, so for now please ensure your Keyring behaves nicely when not passed any options object.
+_Add examples here_
 
-## Keyring Instance Methods
+## API
 
-All below instance methods must return Promises to allow asynchronous resolution.
+See our documentation:
 
-### serialize()
-
-In this method, you must return any JSON-serializable JavaScript object that you like. It will be encoded to a string, encrypted with the user's password, and stored to disk. This is the same object you will receive in the deserialize() method, so it should capture all the information you need to restore the Keyring's state.
-
-### deserialize( object )
-
-As discussed above, the deserialize() method will be passed the JavaScript object that you returned when the serialize() method was called.
-
-### addAccounts( n = 1 )
-
-The addAccounts(n) method is used to inform your keyring that the user wishes to create a new account. You should perform whatever internal steps are needed so that a call to serialize() will persist the new account, and then return an array of the new account addresses.
-
-The method may be called with or without an argument, specifying the number of accounts to create. You should generally default to 1 per call.
-
-### getAccounts()
-
-When this method is called, you must return an array of hex-string addresses for the accounts that your Keyring is able to sign for.
-
-### signTransaction(address, transaction)
-
-This method will receive a hex-prefixed, all-lowercase address string for the account you should sign the incoming transaction with.
-
-For your convenience, the transaction is an instance of ethereumjs-tx, (https://github.com/ethereumjs/ethereumjs-tx) so signing can be as simple as:
-
-```
-transaction.sign(privateKey)
-```
-
-You must return a valid signed ethereumjs-tx (https://github.com/ethereumjs/ethereumjs-tx) object when complete, it can be the same transaction you received.
-
-### signMessage(address, data)
-
-The `eth_sign` method will receive the incoming data, already hashed, and must sign that hash, and then return the raw signed hash.
-
-### getEncryptionPublicKey(address)
-
-This provides the public key for encryption function.
-
-### decryptMessage(address, data)
-
-The `eth_decryptMessage` method will receive the incoming data in array format that returns `encrypt` function in `eth-sig-util` and must decrypt message, and then return the raw message.
-
-### exportAccount(address)
-
-Exports the specified account as a private key hex string.
-
-### removeAccount(address)
-
-removes the specified account from the list of accounts.
+- [Latest published API documentation](https://metamask.github.io/metamask-module-template/latest/)
+- [Latest development API documentation](https://metamask.github.io/metamask-module-template/staging/)
 
 ## Contributing
 
 ### Setup
 
-- Install [Node.js](https://nodejs.org) version 12
+- Install [Node.js](https://nodejs.org) version 14
   - If you are using [nvm](https://github.com/creationix/nvm#installation) (recommended) running `nvm use` will automatically choose the right node version for you.
 - Install [Yarn v3](https://yarnpkg.com/getting-started/install)
 - Run `yarn install` to install dependencies and run any required post-install scripts
@@ -126,6 +87,6 @@ The project follows the same release process as the other libraries in the MetaM
 
 7. Publish the release on npm.
 
-   - Be very careful to use a clean local environment to publish the release, and follow exactly the same steps used during CI.
-   - Use `npm publish --dry-run` to examine the release contents to ensure the correct files are included. Compare to previous releases if necessary (e.g. using `https://unpkg.com/browse/[package name]@[package version]/`).
-   - Once you are confident the release contents are correct, publish the release using `npm publish`.
+   - Wait for the `publish-release` GitHub Action workflow to finish. This should trigger a second job (`publish-npm`), which will wait for a run approval by the [`npm publishers`](https://github.com/orgs/MetaMask/teams/npm-publishers) team.
+   - Approve the `publish-npm` job (or ask somebody on the npm publishers team to approve it for you).
+   - Once the `publish-npm` job has finished, check npm to verify that it has been published.

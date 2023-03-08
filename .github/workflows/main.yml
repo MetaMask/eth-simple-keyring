@@ -50,8 +50,12 @@ jobs:
           fi
 
   is-release:
-    # release merge commits come from github-actions
-    if: startsWith(github.event.commits[0].author.name, 'github-actions')
+    # Filtering by `push` events ensures that we only release from the `main` branch, which is a
+    # requirement for our npm publishing environment.
+    # The commit author should always be 'github-actions' for releases created by the
+    # 'create-release-pr' workflow, so we filter by that as well to prevent accidentally
+    # triggering a release.
+    if: github.event_name == 'push' && startsWith(github.event.head_commit.author.name, 'github-actions')
     needs: all-jobs-pass
     outputs:
       IS_RELEASE: ${{ steps.is-release.outputs.IS_RELEASE }}

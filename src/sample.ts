@@ -6,7 +6,7 @@ let accounts: Record<string, string>[] = [];
 
 keyring
   .addAccounts(37)
-  .then((newAddresses) => {
+  .then(async (newAddresses) => {
     accounts = newAddresses.map((address) => {
       return { address };
     });

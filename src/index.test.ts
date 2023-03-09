@@ -21,7 +21,7 @@ import {
 import { add0x, Hex } from '@metamask/utils';
 import { keccak256 } from 'ethereum-cryptography/keccak';
 
-import SimpleKeyring from '..';
+import SimpleKeyring from '.';
 
 const TYPE_STR = 'Simple Key Pair';
 

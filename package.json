@@ -46,6 +46,7 @@
     "@metamask/eslint-config": "^11.1.0",
     "@metamask/eslint-config-jest": "^11.1.0",
     "@metamask/eslint-config-nodejs": "^11.1.0",
+    "@metamask/eslint-config-typescript": "^11.1.0",
     "@types/jest": "^29.4.0",
     "@types/randombytes": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^5.54.1",

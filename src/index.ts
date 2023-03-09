@@ -1,4 +1,4 @@
-import { Transaction, TxData, TypedTransaction } from '@ethereumjs/tx';
+import { TxData, TypedTransaction } from '@ethereumjs/tx';
 import {
   arrToBufArr,
   bufferToHex,
@@ -24,21 +24,19 @@ import randombytes from 'randombytes';
 
 const _TYPE = 'Simple Key Pair';
 
-export type KeyringSignDataOpts = {
-  withAppKeyOrigin?: string;
-  version?: SignTypedDataVersion;
-};
-
 export default class SimpleKeyring implements Keyring<string[]> {
   #wallets: { privateKey: Buffer; publicKey: Buffer }[];
 
-  public type: string = _TYPE;
+  readonly type: string = _TYPE;
 
   static type: string = _TYPE;
 
   constructor(options: string[] = []) {
     this.#wallets = [];
-    this.deserialize(options);
+    // istanbul ignore next
+    this.deserialize(options).catch(() => {
+      throw new Error('Problem deserializing SimpleKeyring');
+    });
   }
 
   async serialize() {
@@ -80,10 +78,9 @@ export default class SimpleKeyring implements Keyring<string[]> {
     options: Record<string, unknown> = {},
   ): Promise<TxData> {
     const privKey = this.#getPrivateKeyFor(address, options);
-    const tx = transaction as unknown as Transaction;
-    const signedTx = tx.sign(privKey);
+    const signedTx = transaction.sign(privKey);
     // Newer versions of Ethereumjs-tx are immutable and return a new tx object
-    return signedTx === undefined ? tx : signedTx;
+    return signedTx === undefined ? transaction : signedTx;
   }
 
   // For eth_sign, we need to sign arbitrary data:

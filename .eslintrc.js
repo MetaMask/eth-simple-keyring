@@ -11,6 +11,10 @@ module.exports = {
         'node/no-unpublished-require': 0,
       },
     },
+    {
+      files: ['*.ts'],
+      extends: ['@metamask/eslint-config-typescript'],
+    },
   ],
 
   settings: {

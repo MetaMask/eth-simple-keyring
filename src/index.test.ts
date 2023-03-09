@@ -152,8 +152,8 @@ describe('simple-keyring', function () {
 
         /* eslint-disable id-length */
         const r = toBuffer(sgn.slice(0, 66));
-        const s = toBuffer(`0x${sgn.slice(66, 130)}`);
-        const v = BigInt(`0x${sgn.slice(130, 132)}`);
+        const s = toBuffer(`0x${sgn.slice(66, 130) as string}`);
+        const v = BigInt(`0x${sgn.slice(130, 132) as string}`);
         const m = toBuffer(msgHashHex);
         /* eslint-enable id-length */
 

@@ -1,6 +1,5 @@
 module.exports = {
   root: true,
-  parser: '@typescript-eslint/parser',
   extends: ['@metamask/eslint-config', '@metamask/eslint-config-nodejs'],
 
   overrides: [

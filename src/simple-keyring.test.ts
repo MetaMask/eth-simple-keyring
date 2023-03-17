@@ -41,8 +41,9 @@ describe('simple-keyring', function () {
 
   describe('Keyring.type', function () {
     it('is a class property that returns the type string.', function () {
-      const { type } = new SimpleKeyring();
+      const { type } = SimpleKeyring;
       expect(type).toBe(TYPE_STR);
+      expect(type).toBe(keyring.type);
     });
   });
 
@@ -137,7 +138,7 @@ describe('simple-keyring', function () {
       await keyring.deserialize([privateKey]);
       const localMessage = 'hello there!';
       const msgHashHex = bufferToHex(
-        keccak256(Buffer.from(localMessage)) as Buffer,
+        Buffer.from(keccak256(Buffer.from(localMessage))),
       );
 
       await keyring.addAccounts(9);

@@ -347,9 +347,24 @@ describe('simple-keyring', function () {
       expect(restored).toBe(address);
     });
 
-    it('works via version paramter', async function () {
+    it('works via version parameter', async function () {
       await keyring.deserialize([privKeyHex]);
       const signature = await keyring.signTypedData(address, typedData);
+      expect(signature).toBe(expectedSignature);
+      const restored = recoverTypedSignature({
+        data: typedData,
+        signature,
+        version: SignTypedDataVersion.V1,
+      });
+      expect(restored).toBe(address);
+    });
+
+    /**
+     * Test the default opts argument of signTypedData
+     */
+    it("defaults to V1 if you don't give a version parameter", async function () {
+      await keyring.deserialize([privKeyHex]);
+      const signature = await keyring.signTypedData(address, typedData, {});
       expect(signature).toBe(expectedSignature);
       const restored = recoverTypedSignature({
         data: typedData,

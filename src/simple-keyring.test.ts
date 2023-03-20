@@ -33,9 +33,17 @@ const testAccount = {
 
 const notKeyringAddress = '0xbD20F6F5F1616947a39E11926E78ec94817B3931';
 
+const randombytes = jest.requireMock('randombytes');
+jest.mock('randombytes');
+
 describe('simple-keyring', function () {
   let keyring: any; // If you set this to SimpleKeyring instead of any, it opens up a whole can of worms
   beforeEach(function () {
+    const actualModule = jest.requireActual('randombytes');
+
+    // For most tests, make the mock implementation be the actual implementation
+    randombytes.mockImplementation(actualModule);
+
     keyring = new SimpleKeyring();
   });
 
@@ -116,6 +124,29 @@ describe('simple-keyring', function () {
       await expect(
         keyring.signTransaction(notKeyringAddress, tx),
       ).rejects.toThrow('Simple Keyring - Unable to find matching address.');
+    });
+
+    /**
+     * This test forces signTransaction() down an alternate path if signedTx === undefined,
+     * but that's only possible if you change the return type of transaction.sign() to undefined.
+     *
+     * If you try to do this on the tx object, you get "TypeError: Cannot define property sign, object is not extensible"
+     * so you have to do it on the EthereumTx.prototype
+     *
+     * Even on the prototype, TypeScript will give an error, so you must @ts-ignore it.
+     */
+    it('should take the other branch if the transaction object is mutable', async () => {
+      await keyring.deserialize([privateKey]);
+      const tx = TransactionFactory.fromTxData(txParams);
+
+      const mockSign = jest.spyOn(EthereumTx.prototype, 'sign');
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore: stop the TypeScript error for the return type change
+      mockSign.mockReturnValueOnce(undefined);
+
+      const signed = await keyring.signTransaction(address, tx);
+      expect(signed.isSigned()).toBe(false);
     });
   });
 
@@ -201,6 +232,16 @@ describe('simple-keyring', function () {
         await keyring.addAccounts(3);
         const serializedKeyring = await keyring.serialize();
         expect(serializedKeyring).toHaveLength(3);
+      });
+    });
+
+    describe('with an invalid generated key', function () {
+      it('fails', async function () {
+        randombytes.mockReturnValueOnce('deliberately-invalid-key');
+
+        await expect(keyring.addAccounts()).rejects.toThrow(
+          'Private key does not satisfy the curve requirements (ie. it is invalid)',
+        );
       });
     });
   });
@@ -560,6 +601,15 @@ describe('simple-keyring', function () {
       await expect(
         keyring.getEncryptionPublicKey(notKeyringAddress, privateKey),
       ).rejects.toThrow('Simple Keyring - Unable to find matching address.');
+    });
+
+    /**
+     * Test the default options argument of #getPrivateKeyFor
+     */
+    it('works with no options passed to getEncryptionPublicKey and in turn #getPrivateKeyFor', async function () {
+      await keyring.deserialize([privKeyHex]);
+      const encryptionPublicKey = await keyring.getEncryptionPublicKey(address);
+      expect(publicKey).toBe(encryptionPublicKey);
     });
   });
 

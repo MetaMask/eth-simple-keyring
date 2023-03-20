@@ -33,6 +33,7 @@ export default class SimpleKeyring implements Keyring<string[]> {
 
   constructor(options: string[] = []) {
     this.#wallets = [];
+
     // istanbul ignore next
     this.deserialize(options).catch(() => {
       throw new Error('Problem deserializing SimpleKeyring');
@@ -215,7 +216,6 @@ export default class SimpleKeyring implements Keyring<string[]> {
   #generateKey(): Buffer {
     const privateKey = randombytes(32);
 
-    // istanbul ignore next
     if (!isValidPrivate(privateKey)) {
       throw new Error(
         'Private key does not satisfy the curve requirements (ie. it is invalid)',

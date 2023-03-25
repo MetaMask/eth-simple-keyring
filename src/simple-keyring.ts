@@ -1,4 +1,4 @@
-import { TxData, TypedTransaction } from '@ethereumjs/tx';
+import { TypedTransaction } from '@ethereumjs/tx';
 import {
   arrToBufArr,
   bufferToHex,
@@ -22,6 +22,11 @@ import { add0x, Eip1024EncryptedData, Hex, Keyring } from '@metamask/utils';
 import { keccak256 } from 'ethereum-cryptography/keccak';
 import randombytes from 'randombytes';
 
+type KeyringOpt = {
+  withAppKeyOrigin?: string;
+  version?: SignTypedDataVersion | string;
+};
+
 const _TYPE = 'Simple Key Pair';
 
 export default class SimpleKeyring implements Keyring<string[]> {
@@ -31,11 +36,11 @@ export default class SimpleKeyring implements Keyring<string[]> {
 
   static type: string = _TYPE;
 
-  constructor(options: string[] = []) {
+  constructor(opts: string[] = []) {
     this.#wallets = [];
 
     // istanbul ignore next
-    this.deserialize(options).catch(() => {
+    this.deserialize(opts).catch(() => {
       throw new Error('Problem deserializing SimpleKeyring');
     });
   }
@@ -76,9 +81,9 @@ export default class SimpleKeyring implements Keyring<string[]> {
   async signTransaction(
     address: Hex,
     transaction: TypedTransaction,
-    options: Record<string, unknown> = {},
-  ): Promise<TxData> {
-    const privKey = this.#getPrivateKeyFor(address, options);
+    opts: KeyringOpt = {},
+  ): Promise<TypedTransaction> {
+    const privKey = this.#getPrivateKeyFor(address, opts);
     const signedTx = transaction.sign(privKey);
     // Newer versions of Ethereumjs-tx are immutable and return a new tx object
     return signedTx === undefined ? transaction : signedTx;
@@ -119,7 +124,7 @@ export default class SimpleKeyring implements Keyring<string[]> {
   async signTypedData(
     address: Hex,
     typedData: any,
-    opts: Record<string, string> = { version: SignTypedDataVersion.V1 },
+    opts: KeyringOpt = { version: SignTypedDataVersion.V1 },
   ) {
     // Treat invalid versions as "V1"
     const version = Object.keys(SignTypedDataVersion).includes(
@@ -133,20 +138,17 @@ export default class SimpleKeyring implements Keyring<string[]> {
   }
 
   // get public key for nacl
-  async getEncryptionPublicKey(withAccount: Hex, opts: Record<string, string>) {
+  async getEncryptionPublicKey(withAccount: Hex, opts?: KeyringOpt) {
     const privKey = this.#getPrivateKeyFor(withAccount, opts);
     const publicKey = getEncryptionPublicKey(privKey.toString('hex'));
     return publicKey;
   }
 
-  #getPrivateKeyFor(
-    address: Hex,
-    options: Record<string, unknown> = { withAppKeyOrigin: '' },
-  ) {
+  #getPrivateKeyFor(address: Hex, opts: KeyringOpt = { withAppKeyOrigin: '' }) {
     if (!address) {
       throw new Error('Must specify address.');
     }
-    const wallet = this.#getWalletForAccount(address, options);
+    const wallet = this.#getWalletForAccount(address, opts);
     return wallet.privateKey;
   }
 
@@ -186,10 +188,7 @@ export default class SimpleKeyring implements Keyring<string[]> {
     );
   }
 
-  #getWalletForAccount(
-    account: string | number,
-    opts: Record<string, unknown> = {},
-  ) {
+  #getWalletForAccount(account: string | number, opts: KeyringOpt = {}) {
     const address = normalize(account);
     let wallet = this.#wallets.find(
       ({ publicKey }) => bufferToHex(publicToAddress(publicKey)) === address,
@@ -200,10 +199,7 @@ export default class SimpleKeyring implements Keyring<string[]> {
 
     if (opts.withAppKeyOrigin) {
       const { privateKey } = wallet;
-      const appKeyOriginBuffer = Buffer.from(
-        opts.withAppKeyOrigin as string,
-        'utf8',
-      );
+      const appKeyOriginBuffer = Buffer.from(opts.withAppKeyOrigin, 'utf8');
       const appKeyBuffer = Buffer.concat([privateKey, appKeyOriginBuffer]);
       const appKeyPrivateKey = arrToBufArr(keccak256(appKeyBuffer));
       const appKeyPublicKey = privateToPublic(appKeyPrivateKey);

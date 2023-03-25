@@ -1,3 +1,5 @@
+const environmentRules = require('@metamask/eslint-config/src/environment.json');
+
 module.exports = {
   root: true,
 
@@ -26,8 +28,14 @@ module.exports = {
     },
   ],
 
-  // This is necessary to run eslint on Windows and not get a thousand CRLF errors
-  rules: { 'prettier/prettier': ['error', { endOfLine: 'auto' }] },
+  rules: {
+    'no-restricted-globals': [
+      'error',
+      ...environmentRules['no-restricted-globals'].filter(
+        (rule) => typeof rule !== 'string' && !['Buffer'].includes(rule.name),
+      ),
+    ],
+  },
 
   ignorePatterns: [
     '!.eslintrc.js',

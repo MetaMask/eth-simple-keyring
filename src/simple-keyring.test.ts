@@ -19,7 +19,9 @@ import {
   TypedMessage,
 } from '@metamask/eth-sig-util';
 import { add0x, Hex } from '@metamask/utils';
+import assert from 'assert';
 import { keccak256 } from 'ethereum-cryptography/keccak';
+import OldEthereumTx from 'ethereumjs-tx';
 
 import SimpleKeyring from '.';
 
@@ -37,7 +39,7 @@ const randombytes = jest.requireMock('randombytes');
 jest.mock('randombytes');
 
 describe('simple-keyring', function () {
-  let keyring: any; // If you set this to SimpleKeyring instead of any, it opens up a whole can of worms
+  let keyring: SimpleKeyring; // If you set this to SimpleKeyring instead of any, it opens up a whole can of worms
   beforeEach(function () {
     const actualModule = jest.requireActual('randombytes');
 
@@ -92,7 +94,7 @@ describe('simple-keyring', function () {
       value: '0x1000',
     };
 
-    it('returns a signed legacy tx object', async function () {
+    it('returns a signed legacy tx object (using @ethereumjs/tx)', async function () {
       await keyring.deserialize([privateKey]);
       const tx = new EthereumTx(txParams);
       expect(tx.isSigned()).toBe(false);
@@ -113,6 +115,8 @@ describe('simple-keyring', function () {
     it('returns rejected promise if empty address is passed', async function () {
       await keyring.deserialize([privateKey]);
       const tx = TransactionFactory.fromTxData(txParams);
+
+      // @ts-expect-error: intentionally passing invalid address
       await expect(keyring.signTransaction('', tx)).rejects.toThrow(
         'Must specify address.',
       );
@@ -126,27 +130,16 @@ describe('simple-keyring', function () {
       ).rejects.toThrow('Simple Keyring - Unable to find matching address.');
     });
 
-    /**
-     * This test forces signTransaction() down an alternate path if signedTx === undefined,
-     * but that's only possible if you change the return type of transaction.sign() to undefined.
-     *
-     * If you try to do this on the tx object, you get "TypeError: Cannot define property sign, object is not extensible"
-     * so you have to do it on the EthereumTx.prototype
-     *
-     * Even on the prototype, TypeScript will give an error, so you must @ts-ignore it.
-     */
-    it('should take the other branch if the transaction object is mutable', async () => {
+    it('still works if you use the old version of ethereumjs-tx', async () => {
       await keyring.deserialize([privateKey]);
-      const tx = TransactionFactory.fromTxData(txParams);
 
-      const mockSign = jest.spyOn(EthereumTx.prototype, 'sign');
+      const tx = new OldEthereumTx(txParams);
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore: stop the TypeScript error for the return type change
-      mockSign.mockReturnValueOnce(undefined);
-
+      // @ts-expect-error: intentionally using an old library that doesn't comply with TypedTransaction
       const signed = await keyring.signTransaction(address, tx);
-      expect(signed.isSigned()).toBe(false);
+
+      expect(signed.verifySignature()).toBe(true);
+      expect(tx.verifySignature()).toBe(true);
     });
   });
 
@@ -179,13 +172,13 @@ describe('simple-keyring', function () {
           return await keyring.signMessage(accountAddress, msgHashHex);
         }),
       );
-      signatures.forEach((sgn, index) => {
+      signatures.forEach((sgn: string, index) => {
         const accountAddress = addresses[index];
 
         /* eslint-disable id-length */
         const r = toBuffer(sgn.slice(0, 66));
-        const s = toBuffer(`0x${sgn.slice(66, 130) as string}`);
-        const v = BigInt(`0x${sgn.slice(130, 132) as string}`);
+        const s = toBuffer(`0x${sgn.slice(66, 130)}`);
+        const v = BigInt(`0x${sgn.slice(130, 132)}`);
         const m = toBuffer(msgHashHex);
         /* eslint-enable id-length */
 
@@ -205,6 +198,8 @@ describe('simple-keyring', function () {
 
     it('throw error if empty address is passed', async function () {
       await keyring.deserialize([privateKey]);
+
+      // @ts-expect-error: intentionally passing invalid address
       await expect(keyring.signMessage('', message)).rejects.toThrow(
         'Must specify address.',
       );
@@ -249,7 +244,7 @@ describe('simple-keyring', function () {
   describe('#getAccounts', function () {
     it('should return a list of addresses in wallet', async function () {
       // Push a mock wallet
-      keyring.deserialize([testAccount.key]);
+      await keyring.deserialize([testAccount.key]);
 
       const output = await keyring.getAccounts();
       expect(output).toHaveLength(1);
@@ -261,9 +256,9 @@ describe('simple-keyring', function () {
     describe('if the account exists', function () {
       it('should remove that account', async function () {
         await keyring.addAccounts();
-        const addresses = await keyring.getAccounts();
-        expect(addresses).toHaveLength(1);
-        keyring.removeAccount(addresses[0]);
+        const address = (await keyring.getAccounts())[0];
+        assert(address, 'address is undefined');
+        keyring.removeAccount(address);
         const addressesAfterRemoval = await keyring.getAccounts();
         expect(addressesAfterRemoval).toHaveLength(0);
       });
@@ -304,6 +299,8 @@ describe('simple-keyring', function () {
 
     it('throw error if empty address is passed', async function () {
       await keyring.deserialize([privKeyHex]);
+
+      // @ts-expect-error: intentionally passing invalid address
       await expect(keyring.signPersonalMessage('', message)).rejects.toThrow(
         'Must specify address.',
       );
@@ -374,7 +371,7 @@ describe('simple-keyring', function () {
       },
     ];
 
-    it('returns the expected value', async function () {
+    it('works via `V1` string', async function () {
       await keyring.deserialize([privKeyHex]);
       const signature = await keyring.signTypedData(address, typedData, {
         version: 'V1',
@@ -490,8 +487,8 @@ describe('simple-keyring', function () {
       };
 
       await keyring.deserialize([privKeyHex]);
-      const addresses = await keyring.getAccounts();
-      const [address] = addresses;
+      const address = (await keyring.getAccounts())[0];
+      assert(address, 'address is undefined');
       const signature = await keyring.signTypedData(address, typedData, {
         version: 'V3',
       });
@@ -565,6 +562,8 @@ describe('simple-keyring', function () {
 
     it('throw error if wrong encrypted data object is passed', async function () {
       await keyring.deserialize([privKeyHex]);
+
+      // @ts-expect-error: intentionally passing invalid encryptedData
       await expect(keyring.decryptMessage(address, {})).rejects.toThrow(
         'Encryption type/version not supported.',
       );
@@ -582,24 +581,22 @@ describe('simple-keyring', function () {
 
     it('returns the expected value', async function () {
       await keyring.deserialize([privKeyHex]);
-      const encryptionPublicKey = await keyring.getEncryptionPublicKey(
-        address,
-        privateKey,
-      );
+      const encryptionPublicKey = await keyring.getEncryptionPublicKey(address);
       expect(publicKey).toBe(encryptionPublicKey);
     });
 
     it('throw error if address is blank', async function () {
       await keyring.deserialize([privKeyHex]);
       await expect(
-        keyring.getEncryptionPublicKey('', privateKey),
+        // @ts-expect-error: intentionally passing invalid address
+        keyring.getEncryptionPublicKey(''),
       ).rejects.toThrow('Must specify address.');
     });
 
     it('throw error if address is not present in the keyring', async function () {
       await keyring.deserialize([privKeyHex]);
       await expect(
-        keyring.getEncryptionPublicKey(notKeyringAddress, privateKey),
+        keyring.getEncryptionPublicKey(notKeyringAddress),
       ).rejects.toThrow('Simple Keyring - Unable to find matching address.');
     });
 
@@ -673,9 +670,8 @@ describe('simple-keyring', function () {
 
       await keyring.deserialize([privKeyHex]);
 
-      const addresses = await keyring.getAccounts();
-      const [address] = addresses;
-
+      const address = (await keyring.getAccounts())[0];
+      assert(address, 'address is undefined');
       const signature = await keyring.signTypedData(address, typedData, {
         version: 'V4',
       });

@@ -86,6 +86,8 @@ removes the specified account from the list of accounts.
 - Install [Yarn v3](https://yarnpkg.com/getting-started/install)
 - Run `yarn install` to install dependencies and run any required post-install scripts
 
+-- This package implicitly relies on Buffer to be present (meaning that if someone wants to use this in a browser context, they need to supply a polyfill for Buffer or use the `buffer` package)
+
 ### Testing and Linting
 
 Run `yarn test` to run the tests once. To run tests on file changes, run `yarn test:watch`.

@@ -39,9 +39,10 @@ export default class SimpleKeyring implements Keyring<string[]> {
   constructor(privateKeys: string[] = []) {
     this.#wallets = [];
 
-    // istanbul ignore next
-    this.deserialize(privateKeys).catch(() => {
-      throw new Error('Problem deserializing SimpleKeyring');
+    /* istanbul ignore next: It's not possible to write a unit test for this, because a constructor isn't allowed
+     * to be async. Jest can't await the constructor, and when the error gets thrown, Jest can't catch it. */
+    this.deserialize(privateKeys).catch((error: Error) => {
+      throw new Error(`Problem deserializing SimpleKeyring ${error.message}`);
     });
   }
 
@@ -126,11 +127,19 @@ export default class SimpleKeyring implements Keyring<string[]> {
     opts: KeyringOpt = { version: SignTypedDataVersion.V1 },
   ) {
     // Treat invalid versions as "V1"
-    const version = Object.keys(SignTypedDataVersion).includes(
-      opts.version || '',
-    )
-      ? (opts.version as SignTypedDataVersion)
-      : SignTypedDataVersion.V1;
+    let version = SignTypedDataVersion.V1;
+
+    // Type predicate type guard to check if a string is in the enum SignTypedDataVersion
+    // TODO: Put this in @metamask/eth-sig-util
+    const isSignTypedDataVersion = (
+      str: SignTypedDataVersion | string,
+    ): str is SignTypedDataVersion => {
+      return str in SignTypedDataVersion;
+    };
+
+    if (opts.version && isSignTypedDataVersion(opts.version)) {
+      version = SignTypedDataVersion[opts.version];
+    }
 
     const privateKey = this.#getPrivateKeyFor(address, opts);
     return signTypedData({ privateKey, data: typedData, version });

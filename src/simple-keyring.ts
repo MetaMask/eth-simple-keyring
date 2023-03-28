@@ -27,20 +27,20 @@ type KeyringOpt = {
   version?: SignTypedDataVersion | string;
 };
 
-const _TYPE = 'Simple Key Pair';
+const TYPE = 'Simple Key Pair';
 
 export default class SimpleKeyring implements Keyring<string[]> {
   #wallets: { privateKey: Buffer; publicKey: Buffer }[];
 
-  readonly type: string = _TYPE;
+  readonly type: string = TYPE;
 
-  static type: string = _TYPE;
+  static type: string = TYPE;
 
-  constructor(opts: string[] = []) {
+  constructor(privateKeys: string[] = []) {
     this.#wallets = [];
 
     // istanbul ignore next
-    this.deserialize(opts).catch(() => {
+    this.deserialize(privateKeys).catch(() => {
       throw new Error('Problem deserializing SimpleKeyring');
     });
   }
@@ -61,7 +61,7 @@ export default class SimpleKeyring implements Keyring<string[]> {
   async addAccounts(numAccounts = 1) {
     const newWallets = [];
     for (let i = 0; i < numAccounts; i++) {
-      const privateKey = this.#generateKey();
+      const privateKey = generateKey();
       const publicKey = privateToPublic(privateKey);
       newWallets.push({ privateKey, publicKey });
     }
@@ -109,7 +109,6 @@ export default class SimpleKeyring implements Keyring<string[]> {
     opts = { withAppKeyOrigin: '' },
   ) {
     const privKey = this.#getPrivateKeyFor(address, opts);
-    // const privateKey = Buffer.from(privKey, 'hex');
     return personalSign({ privateKey: privKey, data: msgHex });
   }
 
@@ -208,15 +207,20 @@ export default class SimpleKeyring implements Keyring<string[]> {
 
     return wallet;
   }
+}
 
-  #generateKey(): Buffer {
-    const privateKey = randombytes(32);
+/**
+ * Generate and validate a new random key of 32 bytes.
+ *
+ * @returns Buffer The generated key.
+ */
+function generateKey(): Buffer {
+  const privateKey = randombytes(32);
 
-    if (!isValidPrivate(privateKey)) {
-      throw new Error(
-        'Private key does not satisfy the curve requirements (ie. it is invalid)',
-      );
-    }
-    return privateKey;
+  if (!isValidPrivate(privateKey)) {
+    throw new Error(
+      'Private key does not satisfy the curve requirements (ie. it is invalid)',
+    );
   }
+  return privateKey;
 }

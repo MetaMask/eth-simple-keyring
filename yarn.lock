@@ -1275,7 +1275,7 @@ __metadata:
     "@metamask/utils": ^5.0.0
     "@types/ethereumjs-tx": ^1.0.1
     "@types/jest": ^29.5.0
-    "@types/node": ^18.15.6
+    "@types/node": ^18.15.10
     "@types/randombytes": ^2.0.0
     "@typescript-eslint/eslint-plugin": ^5.56.0
     "@typescript-eslint/parser": ^5.56.0
@@ -1636,10 +1636,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.15.6":
-  version: 18.15.6
-  resolution: "@types/node@npm:18.15.6"
-  checksum: 46a1b04553a03574fb845bb4414292d47338d29c40fa25861d3c9e8a957455dfb23ff6385428da1613b02ddc3b5b5fe91c9227c55db80a46a655799ea2add285
+"@types/node@npm:^18.15.10":
+  version: 18.15.10
+  resolution: "@types/node@npm:18.15.10"
+  checksum: 9aeae0b683eda82892def5315812bdee3f1a28c4898b7e70f8e2514564538b16c4dccbe8339c1266f8fc1d707a48f152689264a854f5ebc2eba5011e793612d9
   languageName: node
   linkType: hard
 

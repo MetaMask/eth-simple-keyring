@@ -129,14 +129,6 @@ export default class SimpleKeyring implements Keyring<string[]> {
     // Treat invalid versions as "V1"
     let version = SignTypedDataVersion.V1;
 
-    // Type predicate type guard to check if a string is in the enum SignTypedDataVersion
-    // TODO: Put this in @metamask/eth-sig-util
-    const isSignTypedDataVersion = (
-      str: SignTypedDataVersion | string,
-    ): str is SignTypedDataVersion => {
-      return str in SignTypedDataVersion;
-    };
-
     if (opts.version && isSignTypedDataVersion(opts.version)) {
       version = SignTypedDataVersion[opts.version];
     }
@@ -232,4 +224,17 @@ function generateKey(): Buffer {
     );
   }
   return privateKey;
+}
+
+/**
+ * Type predicate type guard to check if a string is in the enum SignTypedDataVersion.
+ *
+ * @param version - The string to check.
+ * @returns Whether it's in the enum.
+ */
+// TODO: Put this in @metamask/eth-sig-util
+function isSignTypedDataVersion(
+  version: SignTypedDataVersion | string,
+): version is SignTypedDataVersion {
+  return version in SignTypedDataVersion;
 }

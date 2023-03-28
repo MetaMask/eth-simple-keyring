@@ -1,11 +1,12 @@
-const SimpleKeyring = require('.');
+import SimpleKeyring from '.';
 
 const keyring = new SimpleKeyring();
 
-let accounts = [];
-keyring
+let accounts: Record<string, string>[] = [];
+
+keyring // eslint-disable-line @typescript-eslint/no-floating-promises
   .addAccounts(37)
-  .then((newAddresses) => {
+  .then(async (newAddresses) => {
     accounts = newAddresses.map((address) => {
       return { address };
     });
@@ -13,7 +14,7 @@ keyring
   })
   .then((privateKeys) => {
     privateKeys.forEach((privateKey, index) => {
-      accounts[index].privateKey = privateKey;
+      accounts[index]!.privateKey = privateKey; // eslint-disable-line @typescript-eslint/no-non-null-assertion
     });
   })
   .then(() => {

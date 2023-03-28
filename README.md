@@ -81,10 +81,12 @@ removes the specified account from the list of accounts.
 
 ### Setup
 
-- Install [Node.js](https://nodejs.org) version 12
+- Install [Node.js](https://nodejs.org) version 14 or greater
   - If you are using [nvm](https://github.com/creationix/nvm#installation) (recommended) running `nvm use` will automatically choose the right node version for you.
 - Install [Yarn v3](https://yarnpkg.com/getting-started/install)
 - Run `yarn install` to install dependencies and run any required post-install scripts
+
+-- This package implicitly relies on Buffer to be present (meaning that if someone wants to use this in a browser context, they need to supply a polyfill for Buffer or use the `buffer` package)
 
 ### Testing and Linting
 

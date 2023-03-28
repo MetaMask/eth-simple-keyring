@@ -1,26 +1,29 @@
-const {
-  stripHexPrefix,
+import { Transaction as EthereumTx, TransactionFactory } from '@ethereumjs/tx';
+import {
   bufferToHex,
-  toBuffer,
   ecrecover,
-  pubToAddress,
   isValidAddress,
-} = require('@ethereumjs/util');
-const { keccak256 } = require('ethereum-cryptography/keccak');
-const {
+  pubToAddress,
+  stripHexPrefix,
+  toBuffer,
+} from '@ethereumjs/util';
+import {
   encrypt,
   getEncryptionPublicKey,
+  MessageTypes,
   personalSign,
   recoverPersonalSignature,
   recoverTypedSignature,
   signTypedData,
   SignTypedDataVersion,
-} = require('@metamask/eth-sig-util');
-const {
-  TransactionFactory,
-  Transaction: EthereumTx,
-} = require('@ethereumjs/tx');
-const SimpleKeyring = require('..');
+  TypedMessage,
+} from '@metamask/eth-sig-util';
+import { add0x, Hex } from '@metamask/utils';
+import assert from 'assert';
+import { keccak256 } from 'ethereum-cryptography/keccak';
+import OldEthereumTx from 'ethereumjs-tx';
+
+import SimpleKeyring from '.';
 
 const TYPE_STR = 'Simple Key Pair';
 
@@ -32,9 +35,17 @@ const testAccount = {
 
 const notKeyringAddress = '0xbD20F6F5F1616947a39E11926E78ec94817B3931';
 
+const randombytes = jest.requireMock('randombytes');
+jest.mock('randombytes');
+
 describe('simple-keyring', function () {
-  let keyring;
+  let keyring: SimpleKeyring; // If you set this to SimpleKeyring instead of any, it opens up a whole can of worms
   beforeEach(function () {
+    const actualModule = jest.requireActual('randombytes');
+
+    // For most tests, make the mock implementation be the actual implementation
+    randombytes.mockImplementation(actualModule);
+
     keyring = new SimpleKeyring();
   });
 
@@ -42,6 +53,7 @@ describe('simple-keyring', function () {
     it('is a class property that returns the type string.', function () {
       const { type } = SimpleKeyring;
       expect(type).toBe(TYPE_STR);
+      expect(type).toBe(keyring.type);
     });
   });
 
@@ -82,7 +94,7 @@ describe('simple-keyring', function () {
       value: '0x1000',
     };
 
-    it('returns a signed legacy tx object', async function () {
+    it('returns a signed legacy tx object (using @ethereumjs/tx)', async function () {
       await keyring.deserialize([privateKey]);
       const tx = new EthereumTx(txParams);
       expect(tx.isSigned()).toBe(false);
@@ -103,6 +115,8 @@ describe('simple-keyring', function () {
     it('returns rejected promise if empty address is passed', async function () {
       await keyring.deserialize([privateKey]);
       const tx = TransactionFactory.fromTxData(txParams);
+
+      // @ts-expect-error: intentionally passing invalid address
       await expect(keyring.signTransaction('', tx)).rejects.toThrow(
         'Must specify address.',
       );
@@ -114,6 +128,18 @@ describe('simple-keyring', function () {
       await expect(
         keyring.signTransaction(notKeyringAddress, tx),
       ).rejects.toThrow('Simple Keyring - Unable to find matching address.');
+    });
+
+    it('still works if you use the old version of ethereumjs-tx', async () => {
+      await keyring.deserialize([privateKey]);
+
+      const tx = new OldEthereumTx(txParams);
+
+      // @ts-expect-error: intentionally using an old library that doesn't comply with TypedTransaction
+      const signed = await keyring.signTransaction(address, tx);
+
+      expect(signed.verifySignature()).toBe(true);
+      expect(tx.verifySignature()).toBe(true);
     });
   });
 
@@ -135,22 +161,27 @@ describe('simple-keyring', function () {
     it('reliably can decode messages it signs', async function () {
       await keyring.deserialize([privateKey]);
       const localMessage = 'hello there!';
-      const msgHashHex = bufferToHex(keccak256(Buffer.from(localMessage)));
+      const msgHashHex = bufferToHex(
+        Buffer.from(keccak256(Buffer.from(localMessage))),
+      );
 
       await keyring.addAccounts(9);
       const addresses = await keyring.getAccounts();
       const signatures = await Promise.all(
-        addresses.map(async (accountAddress) => {
+        addresses.map(async (accountAddress: Hex) => {
           return await keyring.signMessage(accountAddress, msgHashHex);
         }),
       );
-      signatures.forEach((sgn, index) => {
+      signatures.forEach((sgn: string, index) => {
         const accountAddress = addresses[index];
 
+        /* eslint-disable id-length */
         const r = toBuffer(sgn.slice(0, 66));
         const s = toBuffer(`0x${sgn.slice(66, 130)}`);
         const v = BigInt(`0x${sgn.slice(130, 132)}`);
         const m = toBuffer(msgHashHex);
+        /* eslint-enable id-length */
+
         const pub = ecrecover(m, v, r, s);
         const adr = `0x${pubToAddress(pub).toString('hex')}`;
 
@@ -167,6 +198,8 @@ describe('simple-keyring', function () {
 
     it('throw error if empty address is passed', async function () {
       await keyring.deserialize([privateKey]);
+
+      // @ts-expect-error: intentionally passing invalid address
       await expect(keyring.signMessage('', message)).rejects.toThrow(
         'Must specify address.',
       );
@@ -196,12 +229,22 @@ describe('simple-keyring', function () {
         expect(serializedKeyring).toHaveLength(3);
       });
     });
+
+    describe('with an invalid generated key', function () {
+      it('fails', async function () {
+        randombytes.mockReturnValueOnce('deliberately-invalid-key');
+
+        await expect(keyring.addAccounts()).rejects.toThrow(
+          'Private key does not satisfy the curve requirements (ie. it is invalid)',
+        );
+      });
+    });
   });
 
   describe('#getAccounts', function () {
     it('should return a list of addresses in wallet', async function () {
       // Push a mock wallet
-      keyring.deserialize([testAccount.key]);
+      await keyring.deserialize([testAccount.key]);
 
       const output = await keyring.getAccounts();
       expect(output).toHaveLength(1);
@@ -213,9 +256,9 @@ describe('simple-keyring', function () {
     describe('if the account exists', function () {
       it('should remove that account', async function () {
         await keyring.addAccounts();
-        const addresses = await keyring.getAccounts();
-        expect(addresses).toHaveLength(1);
-        keyring.removeAccount(addresses[0]);
+        const address = (await keyring.getAccounts())[0];
+        assert(address, 'address is undefined');
+        keyring.removeAccount(address);
         const addressesAfterRemoval = await keyring.getAccounts();
         expect(addressesAfterRemoval).toHaveLength(0);
       });
@@ -256,6 +299,8 @@ describe('simple-keyring', function () {
 
     it('throw error if empty address is passed', async function () {
       await keyring.deserialize([privKeyHex]);
+
+      // @ts-expect-error: intentionally passing invalid address
       await expect(keyring.signPersonalMessage('', message)).rejects.toThrow(
         'Must specify address.',
       );
@@ -326,7 +371,7 @@ describe('simple-keyring', function () {
       },
     ];
 
-    it('returns the expected value', async function () {
+    it('works via `V1` string', async function () {
       await keyring.deserialize([privKeyHex]);
       const signature = await keyring.signTypedData(address, typedData, {
         version: 'V1',
@@ -340,9 +385,24 @@ describe('simple-keyring', function () {
       expect(restored).toBe(address);
     });
 
-    it('works via version paramter', async function () {
+    it('works via version parameter', async function () {
       await keyring.deserialize([privKeyHex]);
       const signature = await keyring.signTypedData(address, typedData);
+      expect(signature).toBe(expectedSignature);
+      const restored = recoverTypedSignature({
+        data: typedData,
+        signature,
+        version: SignTypedDataVersion.V1,
+      });
+      expect(restored).toBe(address);
+    });
+
+    /**
+     * Test the default opts argument of signTypedData
+     */
+    it("defaults to V1 if you don't give a version parameter", async function () {
+      await keyring.deserialize([privKeyHex]);
+      const signature = await keyring.signTypedData(address, typedData, {});
       expect(signature).toBe(expectedSignature);
       const restored = recoverTypedSignature({
         data: typedData,
@@ -359,7 +419,7 @@ describe('simple-keyring', function () {
       '0x4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0';
 
     it('returns the expected value', async function () {
-      const typedData = {
+      const typedData: TypedMessage<MessageTypes> = {
         types: {
           EIP712Domain: [],
         },
@@ -388,7 +448,7 @@ describe('simple-keyring', function () {
       '0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c';
 
     it('returns the expected value', async function () {
-      const typedData = {
+      const typedData: TypedMessage<MessageTypes> = {
         types: {
           EIP712Domain: [
             { name: 'name', type: 'string' },
@@ -427,8 +487,8 @@ describe('simple-keyring', function () {
       };
 
       await keyring.deserialize([privKeyHex]);
-      const addresses = await keyring.getAccounts();
-      const [address] = addresses;
+      const address = (await keyring.getAccounts())[0];
+      assert(address, 'address is undefined');
       const signature = await keyring.signTypedData(address, typedData, {
         version: 'V3',
       });
@@ -448,7 +508,7 @@ describe('simple-keyring', function () {
       '0x4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0';
 
     it('returns the expected value', async function () {
-      const typedData = {
+      const typedData: TypedMessage<MessageTypes> = {
         types: {
           EIP712Domain: [],
         },
@@ -479,7 +539,7 @@ describe('simple-keyring', function () {
     const privKeyHex = bufferToHex(privateKey);
     const message = 'Hello world!';
     const encryptedMessage = encrypt({
-      publicKey: getEncryptionPublicKey(privateKey),
+      publicKey: getEncryptionPublicKey(privateKey.toString('hex')),
       data: message,
       version: 'x25519-xsalsa20-poly1305',
     });
@@ -502,6 +562,8 @@ describe('simple-keyring', function () {
 
     it('throw error if wrong encrypted data object is passed', async function () {
       await keyring.deserialize([privKeyHex]);
+
+      // @ts-expect-error: intentionally passing invalid encryptedData
       await expect(keyring.decryptMessage(address, {})).rejects.toThrow(
         'Encryption type/version not supported.',
       );
@@ -519,25 +581,32 @@ describe('simple-keyring', function () {
 
     it('returns the expected value', async function () {
       await keyring.deserialize([privKeyHex]);
-      const encryptionPublicKey = await keyring.getEncryptionPublicKey(
-        address,
-        privateKey,
-      );
+      const encryptionPublicKey = await keyring.getEncryptionPublicKey(address);
       expect(publicKey).toBe(encryptionPublicKey);
     });
 
     it('throw error if address is blank', async function () {
       await keyring.deserialize([privKeyHex]);
       await expect(
-        keyring.getEncryptionPublicKey('', privateKey),
+        // @ts-expect-error: intentionally passing invalid address
+        keyring.getEncryptionPublicKey(''),
       ).rejects.toThrow('Must specify address.');
     });
 
     it('throw error if address is not present in the keyring', async function () {
       await keyring.deserialize([privKeyHex]);
       await expect(
-        keyring.getEncryptionPublicKey(notKeyringAddress, privateKey),
+        keyring.getEncryptionPublicKey(notKeyringAddress),
       ).rejects.toThrow('Simple Keyring - Unable to find matching address.');
+    });
+
+    /**
+     * Test the default options argument of #getPrivateKeyFor
+     */
+    it('works with no options passed to getEncryptionPublicKey and in turn #getPrivateKeyFor', async function () {
+      await keyring.deserialize([privKeyHex]);
+      const encryptionPublicKey = await keyring.getEncryptionPublicKey(address);
+      expect(publicKey).toBe(encryptionPublicKey);
     });
   });
 
@@ -548,7 +617,7 @@ describe('simple-keyring', function () {
       '0x65cbd956f2fae28a601bebc9b906cea0191744bd4c4247bcd27cd08f8eb6b71c78efdf7a31dc9abee78f492292721f362d296cf86b4538e07b51303b67f749061b';
 
     it('returns the expected value', async function () {
-      const typedData = {
+      const typedData: TypedMessage<MessageTypes> = {
         types: {
           EIP712Domain: [
             { name: 'name', type: 'string' },
@@ -601,9 +670,8 @@ describe('simple-keyring', function () {
 
       await keyring.deserialize([privKeyHex]);
 
-      const addresses = await keyring.getAccounts();
-      const [address] = addresses;
-
+      const address = (await keyring.getAccounts())[0];
+      assert(address, 'address is undefined');
       const signature = await keyring.signTypedData(address, typedData, {
         version: 'V4',
       });
@@ -623,7 +691,7 @@ describe('simple-keyring', function () {
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
 
       const appKeyAddress = await simpleKeyring.getAppKeyAddress(
-        address,
+        add0x(address),
         'someapp.origin.io',
       );
 
@@ -636,14 +704,14 @@ describe('simple-keyring', function () {
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
 
       const appKeyAddress1 = await simpleKeyring.getAppKeyAddress(
-        address,
+        add0x(address),
         'someapp.origin.io',
       );
 
       expect(isValidAddress(appKeyAddress1)).toBe(true);
 
       const appKeyAddress2 = await simpleKeyring.getAppKeyAddress(
-        address,
+        add0x(address),
         'anotherapp.origin.io',
       );
 
@@ -656,14 +724,14 @@ describe('simple-keyring', function () {
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
 
       const appKeyAddress1 = await simpleKeyring.getAppKeyAddress(
-        address,
+        add0x(address),
         'someapp.origin.io',
       );
 
       expect(isValidAddress(appKeyAddress1)).toBe(true);
 
       const appKeyAddress2 = await simpleKeyring.getAppKeyAddress(
-        address,
+        add0x(address),
         'someapp.origin.io',
       );
 
@@ -675,18 +743,18 @@ describe('simple-keyring', function () {
       const { address } = testAccount;
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
 
-      await expect(simpleKeyring.getAppKeyAddress(address, [])).rejects.toThrow(
-        `'origin' must be a non-empty string`,
-      );
+      await expect(
+        simpleKeyring.getAppKeyAddress(add0x(address), ''),
+      ).rejects.toThrow(`'origin' must be a non-empty string`);
     });
 
     it('should throw error if the provided origin is an empty string', async function () {
       const { address } = testAccount;
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
 
-      await expect(simpleKeyring.getAppKeyAddress(address, '')).rejects.toThrow(
-        `'origin' must be a non-empty string`,
-      );
+      await expect(
+        simpleKeyring.getAppKeyAddress(add0x(address), ''),
+      ).rejects.toThrow(`'origin' must be a non-empty string`);
     });
   });
 
@@ -694,7 +762,7 @@ describe('simple-keyring', function () {
     it('should return a hex-encoded private key', async function () {
       const { address } = testAccount;
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
-      const privKeyHexValue = await simpleKeyring.exportAccount(address);
+      const privKeyHexValue = await simpleKeyring.exportAccount(add0x(address));
       expect(testAccount.key).toBe(`0x${privKeyHexValue}`);
     });
 
@@ -717,7 +785,7 @@ describe('simple-keyring', function () {
 
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
       const signature = await simpleKeyring.signPersonalMessage(
-        address,
+        add0x(address),
         message,
         {
           withAppKeyOrigin: 'someapp.origin.io',
@@ -729,7 +797,7 @@ describe('simple-keyring', function () {
 
     it('should signTypedData V3 with the expected key when passed a withAppKeyOrigin', async function () {
       const { address } = testAccount;
-      const typedData = {
+      const typedData: TypedMessage<MessageTypes> = {
         types: {
           EIP712Domain: [],
         },
@@ -748,10 +816,14 @@ describe('simple-keyring', function () {
       });
 
       const simpleKeyring = new SimpleKeyring([testAccount.key]);
-      const signature = await simpleKeyring.signTypedData(address, typedData, {
-        withAppKeyOrigin: 'someapp.origin.io',
-        version: 'V3',
-      });
+      const signature = await simpleKeyring.signTypedData(
+        add0x(address),
+        typedData,
+        {
+          withAppKeyOrigin: 'someapp.origin.io',
+          version: SignTypedDataVersion.V3,
+        },
+      );
 
       expect(expectedSignature).toBe(signature);
     });

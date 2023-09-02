@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.1]
+### Uncategorized
+- Bump word-wrap from 1.2.3 to 1.2.4 ([#147](https://github.com/MetaMask/eth-simple-keyring/pull/147))
+- Bump semver from 6.3.0 to 6.3.1 ([#146](https://github.com/MetaMask/eth-simple-keyring/pull/146))
+- Bump @metamask/eth-sig-util from 5.0.3 to 5.1.0 ([#144](https://github.com/MetaMask/eth-simple-keyring/pull/144))
+- Bump @metamask/eth-sig-util from 5.0.2 to 5.0.3 ([#143](https://github.com/MetaMask/eth-simple-keyring/pull/143))
+- Bump @metamask/utils from 5.0.0 to 5.0.1 ([#141](https://github.com/MetaMask/eth-simple-keyring/pull/141))
+- Typescript migration + standardization ([#140](https://github.com/MetaMask/eth-simple-keyring/pull/140))
+- Bump http-cache-semantics from 4.1.0 to 4.1.1 ([#137](https://github.com/MetaMask/eth-simple-keyring/pull/137))
+- Delete `.yarnrc` file ([#136](https://github.com/MetaMask/eth-simple-keyring/pull/136))
+- fix build-lint-test typo ([#134](https://github.com/MetaMask/eth-simple-keyring/pull/134))
+- Bump json5 from 1.0.1 to 1.0.2 ([#133](https://github.com/MetaMask/eth-simple-keyring/pull/133))
+- Bump qs from 6.5.2 to 6.5.3 ([#128](https://github.com/MetaMask/eth-simple-keyring/pull/128))
+
 ## [5.0.0]
 ### Changed
 - **BREAKING:** Makes version-specific `signTypedData` methods private ([#84](https://github.com/MetaMask/eth-simple-keyring/pull/84))
@@ -21,5 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING:** Remove redundant `newGethSignMessage` method ([#72](https://github.com/MetaMask/eth-simple-keyring/pull/72))
     - Consumers can use `signPersonalMessage` method as a replacement for `newGethSignMessage`. 
 
-[Unreleased]: https://github.com/MetaMask/eth-simple-keyring/compare/v5.0.0...HEAD
+[Unreleased]: https://github.com/MetaMask/eth-simple-keyring/compare/v5.0.1...HEAD
+[5.0.1]: https://github.com/MetaMask/eth-simple-keyring/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/MetaMask/eth-simple-keyring/releases/tag/v5.0.0

@@ -512,7 +512,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethereumjs/util@npm:^8.0.5, @ethereumjs/util@npm:^8.1.0":
+"@ethereumjs/util@npm:^8.1.0":
   version: 8.1.0
   resolution: "@ethereumjs/util@npm:8.1.0"
   dependencies:
@@ -986,7 +986,7 @@ __metadata:
   resolution: "@metamask/eth-simple-keyring@workspace:."
   dependencies:
     "@ethereumjs/tx": ^4.1.1
-    "@ethereumjs/util": ^8.0.5
+    "@ethereumjs/util": ^8.1.0
     "@lavamoat/allow-scripts": ^2.3.0
     "@metamask/auto-changelog": ^3.1.0
     "@metamask/eslint-config": ^11.1.0

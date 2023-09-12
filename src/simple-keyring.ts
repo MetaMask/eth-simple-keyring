@@ -94,9 +94,15 @@ export default class SimpleKeyring implements Keyring<string[]> {
   async signMessage(
     address: Hex,
     data: string,
-    opts = { withAppKeyOrigin: '' },
+    opts = { withAppKeyOrigin: '', validateMessage: true },
   ) {
     const message = stripHexPrefix(data);
+    if (
+      opts.validateMessage &&
+      (message.length === 0 || !message.match(/^[a-fA-F0-9]*$/u))
+    ) {
+      throw new Error('Cannot sign invalid message');
+    }
     const privKey = this.#getPrivateKeyFor(address, opts);
     const msgSig = ecsign(Buffer.from(message, 'hex'), privKey);
     const rawMsgSig = concatSig(toBuffer(msgSig.v), msgSig.r, msgSig.s);

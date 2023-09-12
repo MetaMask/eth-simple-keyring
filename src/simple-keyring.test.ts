@@ -192,7 +192,7 @@ describe('simple-keyring', function () {
     it('throw error for invalid message', async function () {
       await keyring.deserialize([privateKey]);
       await expect(keyring.signMessage(address, '')).rejects.toThrow(
-        'Cannot convert 0x to a BigInt',
+        'Cannot sign invalid message',
       );
     });
 

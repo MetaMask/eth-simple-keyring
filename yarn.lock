@@ -1045,15 +1045,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/curves@npm:1.0.0, @noble/curves@npm:~1.0.0":
-  version: 1.0.0
-  resolution: "@noble/curves@npm:1.0.0"
-  dependencies:
-    "@noble/hashes": 1.3.0
-  checksum: 6bcef44d626c640dc8961819d68dd67dffb907e3b973b7c27efe0ecdd9a5c6ce62c7b9e3dfc930c66605dced7f1ec0514d191c09a2ce98d6d52b66e3315ffa79
-  languageName: node
-  linkType: hard
-
 "@noble/curves@npm:1.1.0, @noble/curves@npm:~1.1.0":
   version: 1.1.0
   resolution: "@noble/curves@npm:1.1.0"
@@ -1070,13 +1061,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/hashes@npm:1.3.0, @noble/hashes@npm:~1.3.0":
-  version: 1.3.0
-  resolution: "@noble/hashes@npm:1.3.0"
-  checksum: d7ddb6d7c60f1ce1f87facbbef5b724cdea536fc9e7f59ae96e0fc9de96c8f1a2ae2bdedbce10f7dcc621338dfef8533daa73c873f2b5c87fa1a4e05a95c2e2e
-  languageName: node
-  linkType: hard
-
 "@noble/hashes@npm:1.3.1":
   version: 1.3.1
   resolution: "@noble/hashes@npm:1.3.1"
@@ -1084,7 +1068,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/hashes@npm:~1.3.1":
+"@noble/hashes@npm:~1.3.0, @noble/hashes@npm:~1.3.1":
   version: 1.3.2
   resolution: "@noble/hashes@npm:1.3.2"
   checksum: fe23536b436539d13f90e4b9be843cc63b1b17666a07634a2b1259dded6f490be3d050249e6af98076ea8f2ea0d56f578773c2197f2aa0eeaa5fba5bc18ba474
@@ -1191,17 +1175,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@scure/bip32@npm:1.3.0":
-  version: 1.3.0
-  resolution: "@scure/bip32@npm:1.3.0"
-  dependencies:
-    "@noble/curves": ~1.0.0
-    "@noble/hashes": ~1.3.0
-    "@scure/base": ~1.1.0
-  checksum: 6eae997f9bdf41fe848134898960ac48e645fa10e63d579be965ca331afd0b7c1b8ebac170770d237ab4099dafc35e5a82995384510025ccf2abe669f85e8918
-  languageName: node
-  linkType: hard
-
 "@scure/bip32@npm:1.3.1":
   version: 1.3.1
   resolution: "@scure/bip32@npm:1.3.1"
@@ -1220,16 +1193,6 @@ __metadata:
     "@noble/hashes": ~1.2.0
     "@scure/base": ~1.1.0
   checksum: fbb594c50696fa9c14e891d872f382e50a3f919b6c96c55ef2fb10c7102c546dafb8f099a62bd114c12a00525b595dcf7381846f383f0ddcedeaa6e210747d2f
-  languageName: node
-  linkType: hard
-
-"@scure/bip39@npm:1.2.0":
-  version: 1.2.0
-  resolution: "@scure/bip39@npm:1.2.0"
-  dependencies:
-    "@noble/hashes": ~1.3.0
-    "@scure/base": ~1.1.0
-  checksum: 980d761f53e63de04a9e4db840eb13bfb1bd1b664ecb04a71824c12c190f4972fd84146f3ed89b2a8e4c6bd2c17c15f8b592b7ac029e903323b0f9e2dae6916b
   languageName: node
   linkType: hard
 
@@ -1444,14 +1407,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*":
-  version: 18.15.3
-  resolution: "@types/node@npm:18.15.3"
-  checksum: 31b1d92475a82c30de29aa6c0771b18a276552d191283b4423ba2d61b3f01159bf0d02576c0b7cc834b043997893800db6bb47f246083ed85aa45e79c80875d7
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^18.15.10":
+"@types/node@npm:*, @types/node@npm:^18.15.10":
   version: 18.15.10
   resolution: "@types/node@npm:18.15.10"
   checksum: 9aeae0b683eda82892def5315812bdee3f1a28c4898b7e70f8e2514564538b16c4dccbe8339c1266f8fc1d707a48f152689264a854f5ebc2eba5011e793612d9
@@ -1570,16 +1526,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/scope-manager@npm:5.55.0":
-  version: 5.55.0
-  resolution: "@typescript-eslint/scope-manager@npm:5.55.0"
-  dependencies:
-    "@typescript-eslint/types": 5.55.0
-    "@typescript-eslint/visitor-keys": 5.55.0
-  checksum: f253db88f69a29e4abe2f567d0a611cc3e7fb1a911a2cc54a2f6baf16e3de4d1883b3f8e45ee61b3db9fa5543dda0fd7b608de9d28ba6173ab49bfd17ff90cad
-  languageName: node
-  linkType: hard
-
 "@typescript-eslint/scope-manager@npm:5.57.0":
   version: 5.57.0
   resolution: "@typescript-eslint/scope-manager@npm:5.57.0"
@@ -1607,35 +1553,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/types@npm:5.55.0":
-  version: 5.55.0
-  resolution: "@typescript-eslint/types@npm:5.55.0"
-  checksum: 7d851f09a2106514d3a9c7164d34758f30abfe554e3c7a02be75cdc7e16644e23ca32840a8f39a0321bc509927fb4d98ce91b22b21e8544ac56cef33b815a864
-  languageName: node
-  linkType: hard
-
 "@typescript-eslint/types@npm:5.57.0":
   version: 5.57.0
   resolution: "@typescript-eslint/types@npm:5.57.0"
   checksum: 79a100fb650965f63c01c20e6abd79ca0d2043c3a329b9fef89917d6b9ba3c0f946dca3f14f2975ee6349daadd6ce0e98fde3aafe4b710e5a27abe1adc590c85
-  languageName: node
-  linkType: hard
-
-"@typescript-eslint/typescript-estree@npm:5.55.0":
-  version: 5.55.0
-  resolution: "@typescript-eslint/typescript-estree@npm:5.55.0"
-  dependencies:
-    "@typescript-eslint/types": 5.55.0
-    "@typescript-eslint/visitor-keys": 5.55.0
-    debug: ^4.3.4
-    globby: ^11.1.0
-    is-glob: ^4.0.3
-    semver: ^7.3.7
-    tsutils: ^3.21.0
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: d24a11aee3d01067018d99804f420aecb8af88e43bf170d5d14f6480bd378c0a81ce49a37f5d6c36e5f0f319e3fa8b099720f295f2767338be1a4f7e9a5323e1
   languageName: node
   linkType: hard
 
@@ -1657,7 +1578,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:5.57.0":
+"@typescript-eslint/utils@npm:5.57.0, @typescript-eslint/utils@npm:^5.10.0":
   version: 5.57.0
   resolution: "@typescript-eslint/utils@npm:5.57.0"
   dependencies:
@@ -1672,34 +1593,6 @@ __metadata:
   peerDependencies:
     eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
   checksum: 461258e1194d24c5e642c65ba1afd612712fa8e617ac85cfbbe3dde2557fe4abadedbce19a6954ae0cccbfb92b8a09f38d65a3eedca0394861a5d1c4c893c5ed
-  languageName: node
-  linkType: hard
-
-"@typescript-eslint/utils@npm:^5.10.0":
-  version: 5.55.0
-  resolution: "@typescript-eslint/utils@npm:5.55.0"
-  dependencies:
-    "@eslint-community/eslint-utils": ^4.2.0
-    "@types/json-schema": ^7.0.9
-    "@types/semver": ^7.3.12
-    "@typescript-eslint/scope-manager": 5.55.0
-    "@typescript-eslint/types": 5.55.0
-    "@typescript-eslint/typescript-estree": 5.55.0
-    eslint-scope: ^5.1.1
-    semver: ^7.3.7
-  peerDependencies:
-    eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
-  checksum: 368cfc3fb9d6af6901e739e2e41c3f7f1c1244576607445f4f59d95eccb237f73e1a75e7f0816ec9a32a0f1ec6bb4a3602a99e17e70fe184e62f7c69dcbe4b8d
-  languageName: node
-  linkType: hard
-
-"@typescript-eslint/visitor-keys@npm:5.55.0":
-  version: 5.55.0
-  resolution: "@typescript-eslint/visitor-keys@npm:5.55.0"
-  dependencies:
-    "@typescript-eslint/types": 5.55.0
-    eslint-visitor-keys: ^3.3.0
-  checksum: 0b24c72dff99dd2cf41c19d20067f8ab20a38aa2e82c79c5530bec7cf651031e95c80702fc21c813c9b94e5f3d4cd210f13967b2966ef38abe548cb5f05848a3
   languageName: node
   linkType: hard
 
@@ -3406,19 +3299,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethereum-cryptography@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "ethereum-cryptography@npm:2.0.0"
-  dependencies:
-    "@noble/curves": 1.0.0
-    "@noble/hashes": 1.3.0
-    "@scure/bip32": 1.3.0
-    "@scure/bip39": 1.2.0
-  checksum: 958f8aab2d1b32aa759fb27a27877b3647410e8bb9aca7d65d1d477db4864cf7fc46b918eb52a1e246c25e98ee0a35a632c88b496aeaefa13469ee767a76c8db
-  languageName: node
-  linkType: hard
-
-"ethereum-cryptography@npm:^2.1.2":
+"ethereum-cryptography@npm:^2.0.0, ethereum-cryptography@npm:^2.1.2":
   version: 2.1.2
   resolution: "ethereum-cryptography@npm:2.1.2"
   dependencies:

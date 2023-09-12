@@ -1316,7 +1316,7 @@ __metadata:
     "@metamask/eslint-config-nodejs": ^11.1.0
     "@metamask/eslint-config-typescript": ^11.1.0
     "@metamask/eth-sig-util": ^6.0.1
-    "@metamask/utils": ^5.0.0
+    "@metamask/utils": ^5.0.2
     "@types/ethereumjs-tx": ^1.0.1
     "@types/jest": ^29.5.0
     "@types/node": ^18.15.10
@@ -1351,19 +1351,6 @@ __metadata:
     semver: ^7.3.8
     superstruct: ^1.0.3
   checksum: 1ebc6677bb017e4d09d4af143621fe27194d8ed815234cfd76469c3c734dc1db2ea7b577c01a2096c21c04d8c9c4d721d3035b5353fe2ded3b4737f326755e43
-  languageName: node
-  linkType: hard
-
-"@metamask/utils@npm:^5.0.0":
-  version: 5.0.1
-  resolution: "@metamask/utils@npm:5.0.1"
-  dependencies:
-    "@ethereumjs/tx": ^4.1.1
-    "@types/debug": ^4.1.7
-    debug: ^4.3.4
-    semver: ^7.3.8
-    superstruct: ^1.0.3
-  checksum: 29745bd3d2db06bf66263bdec04e93a8f417c46c69d8054149c0046ed54b5f13d26d94a998fff1a31b5a8e7a2200935bfc8392a5fa3c4261e3cecd3ccdd9ddc0
   languageName: node
   linkType: hard
 

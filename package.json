@@ -1,6 +1,6 @@
 {
   "name": "@metamask/eth-simple-keyring",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "A simple standard interface for a series of Ethereum private keys.",
   "keywords": [
     "ethereum",
@@ -67,6 +67,7 @@
     "prettier": "^2.8.7",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
+    "typedoc": "^0.25.1",
     "typescript": "~4.8.4"
   },
   "packageManager": "yarn@3.3.0",

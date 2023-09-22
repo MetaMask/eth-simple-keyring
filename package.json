@@ -34,10 +34,10 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@ethereumjs/util": "^8.0.5",
+    "@ethereumjs/util": "^8.1.0",
     "@metamask/eth-sig-util": "^6.0.1",
-    "@metamask/utils": "^5.0.2",
-    "ethereum-cryptography": "^1.2.0",
+    "@metamask/utils": "^8.1.0",
+    "ethereum-cryptography": "^2.1.2",
     "randombytes": "^2.1.0"
   },
   "devDependencies": {

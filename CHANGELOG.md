@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.0]
+### Changed
+- **BREAKING**: Increase minimum Node.js version to 16 ([#152](https://github.com/MetaMask/eth-simple-keyring/pull/152))
+- **BREAKING**: Bump @metamask/eth-sig-util from ^6.0.1 to ^7.0.0 ([#156](https://github.com/MetaMask/eth-simple-keyring/pull/156))
+- Bump @metamask/utils from ^5.0.0 to ^8.1.0 ([#153](https://github.com/MetaMask/eth-simple-keyring/pull/153))
+- Bump ethereum-cryptography from ^1.2.0 to ^2.1.2 ([#153](https://github.com/MetaMask/eth-simple-keyring/pull/153))
+
 ## [5.1.0]
 ### Changed
 - Export TypeScript interfaces ([#140](https://github.com/MetaMask/eth-simple-keyring/pull/140))
@@ -29,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING:** Remove redundant `newGethSignMessage` method ([#72](https://github.com/MetaMask/eth-simple-keyring/pull/72))
     - Consumers can use `signPersonalMessage` method as a replacement for `newGethSignMessage`.
 
-[Unreleased]: https://github.com/MetaMask/eth-simple-keyring/compare/v5.1.0...HEAD
+[Unreleased]: https://github.com/MetaMask/eth-simple-keyring/compare/v6.0.0...HEAD
+[6.0.0]: https://github.com/MetaMask/eth-simple-keyring/compare/v5.1.0...v6.0.0
 [5.1.0]: https://github.com/MetaMask/eth-simple-keyring/compare/v5.0.0...v5.1.0
 [5.0.0]: https://github.com/MetaMask/eth-simple-keyring/releases/tag/v5.0.0

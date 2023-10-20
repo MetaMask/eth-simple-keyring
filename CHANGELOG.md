@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.1]
+### Uncategorized
+- fix: treat undefined/null as [] in deserialize ([#163](https://github.com/MetaMask/eth-simple-keyring/pull/163))
+- Bump @babel/traverse from 7.21.3 to 7.23.2 ([#164](https://github.com/MetaMask/eth-simple-keyring/pull/164))
+- Bump postcss from 8.4.21 to 8.4.31 ([#162](https://github.com/MetaMask/eth-simple-keyring/pull/162))
+
 ## [6.0.0]
 ### Changed
 - **BREAKING**: Increase minimum Node.js version to 16 ([#152](https://github.com/MetaMask/eth-simple-keyring/pull/152))
@@ -36,7 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING:** Remove redundant `newGethSignMessage` method ([#72](https://github.com/MetaMask/eth-simple-keyring/pull/72))
     - Consumers can use `signPersonalMessage` method as a replacement for `newGethSignMessage`.
 
-[Unreleased]: https://github.com/MetaMask/eth-simple-keyring/compare/v6.0.0...HEAD
+[Unreleased]: https://github.com/MetaMask/eth-simple-keyring/compare/v6.0.1...HEAD
+[6.0.1]: https://github.com/MetaMask/eth-simple-keyring/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/MetaMask/eth-simple-keyring/compare/v5.1.0...v6.0.0
 [5.1.0]: https://github.com/MetaMask/eth-simple-keyring/compare/v5.0.0...v5.1.0
 [5.0.0]: https://github.com/MetaMask/eth-simple-keyring/releases/tag/v5.0.0

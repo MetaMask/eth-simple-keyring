@@ -50,7 +50,7 @@ export default class SimpleKeyring implements Keyring<string[]> {
     return this.#wallets.map((a) => a.privateKey.toString('hex'));
   }
 
-  async deserialize(privateKeys: string[]) {
+  async deserialize(privateKeys: string[] = []) {
     this.#wallets = privateKeys.map((hexPrivateKey) => {
       const strippedHexPrivateKey = stripHexPrefix(hexPrivateKey);
       const privateKey = Buffer.from(strippedHexPrivateKey, 'hex');

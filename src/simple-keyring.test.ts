@@ -73,6 +73,17 @@ describe('simple-keyring', function () {
     });
   });
 
+  describe('#deserialize an empty value', function () {
+    it('resets wallets', async function () {
+      await keyring.deserialize([testAccount.key]);
+      const serialized = await keyring.serialize();
+      expect(serialized).toHaveLength(1);
+      await keyring.deserialize(undefined);
+      const serialized2 = await keyring.serialize();
+      expect(serialized2).toHaveLength(0);
+    });
+  });
+
   describe('#constructor with a private key', function () {
     it('has the correct addresses', async function () {
       const newKeyring = new SimpleKeyring([testAccount.key]);

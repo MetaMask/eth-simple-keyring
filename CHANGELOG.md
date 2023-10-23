@@ -7,10 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [6.0.1]
-### Uncategorized
-- fix: treat undefined/null as [] in deserialize ([#163](https://github.com/MetaMask/eth-simple-keyring/pull/163))
-- Bump @babel/traverse from 7.21.3 to 7.23.2 ([#164](https://github.com/MetaMask/eth-simple-keyring/pull/164))
-- Bump postcss from 8.4.21 to 8.4.31 ([#162](https://github.com/MetaMask/eth-simple-keyring/pull/162))
+### Fixed
+- Treat `undefined` and `null` as empty array in deserialize function ([#163](https://github.com/MetaMask/eth-simple-keyring/pull/163))
 
 ## [6.0.0]
 ### Changed
@@ -18,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING**: Bump @metamask/eth-sig-util from ^6.0.1 to ^7.0.0 ([#156](https://github.com/MetaMask/eth-simple-keyring/pull/156))
 - Bump @metamask/utils from ^5.0.0 to ^8.1.0 ([#153](https://github.com/MetaMask/eth-simple-keyring/pull/153))
 - Bump ethereum-cryptography from ^1.2.0 to ^2.1.2 ([#153](https://github.com/MetaMask/eth-simple-keyring/pull/153))
+
+## [5.1.1]
+### Fixed
+- Treat `undefined` and `null` as empty array in deserialize function ([#166](https://github.com/MetaMask/eth-simple-keyring/pull/166))
 
 ## [5.1.0]
 ### Changed
@@ -44,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/MetaMask/eth-simple-keyring/compare/v6.0.1...HEAD
 [6.0.1]: https://github.com/MetaMask/eth-simple-keyring/compare/v6.0.0...v6.0.1
-[6.0.0]: https://github.com/MetaMask/eth-simple-keyring/compare/v5.1.0...v6.0.0
+[6.0.0]: https://github.com/MetaMask/eth-simple-keyring/compare/v5.1.1...v6.0.0
+[5.1.1]: https://github.com/MetaMask/eth-simple-keyring/compare/v5.1.0...v5.1.1
 [5.1.0]: https://github.com/MetaMask/eth-simple-keyring/compare/v5.0.0...v5.1.0
 [5.0.0]: https://github.com/MetaMask/eth-simple-keyring/releases/tag/v5.0.0

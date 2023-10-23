@@ -882,29 +882,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lavamoat/aa@npm:^3.1.5":
-  version: 3.1.5
-  resolution: "@lavamoat/aa@npm:3.1.5"
+"@lavamoat/aa@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@lavamoat/aa@npm:4.0.0"
   dependencies:
     resolve: ^1.22.3
   bin:
     lavamoat-ls: src/cli.js
-  checksum: 46ced120a30e9472c2e448bd6af694911c644ee036d6cd0087692b47c553b5ac26748a9bff1e99f1220f672579bce664fb48cb2f39884fd0b1a45d16b9195e48
+  checksum: e4345c2e03c4f51e3f0d8158922a7c7fb18730c97f7e5b02dad07f7d769a376e64f5d6eef7dfecddd4ced42f676dc8913e99625c43cc94fbf0e38febd3efdf55
   languageName: node
   linkType: hard
 
-"@lavamoat/allow-scripts@npm:^2.5.1":
-  version: 2.5.1
-  resolution: "@lavamoat/allow-scripts@npm:2.5.1"
+"@lavamoat/allow-scripts@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@lavamoat/allow-scripts@npm:3.0.0"
   dependencies:
-    "@lavamoat/aa": ^3.1.5
+    "@lavamoat/aa": ^4.0.0
     "@npmcli/run-script": ^6.0.0
     bin-links: 4.0.1
     npm-normalize-package-bin: ^3.0.0
-    yargs: ^16.2.0
+    yargs: ^17.7.2
   bin:
     allow-scripts: src/cli.js
-  checksum: 5f249803b13ad1d2900d1be7d500135b3898f700465e748e7f9d88a7c5a8b07829a0665910d4047ffd65877babe94a80c8e8c9ad8ee02e61446e89bcd4179611
+  checksum: 95a0f258f8edca6db97ac2f2064ba37a9e624c558cc6087189eaac6687f242fe05e4cc1dba2b2ac239db331b562e2b184feef89f244cac5e38bbc23b9f50f4b6
   languageName: node
   linkType: hard
 
@@ -1002,7 +1002,7 @@ __metadata:
   dependencies:
     "@ethereumjs/tx": ^4.1.1
     "@ethereumjs/util": ^8.1.0
-    "@lavamoat/allow-scripts": ^2.5.1
+    "@lavamoat/allow-scripts": ^3.0.0
     "@metamask/auto-changelog": ^3.1.0
     "@metamask/eslint-config": ^11.1.0
     "@metamask/eslint-config-jest": ^11.1.0
@@ -6940,7 +6940,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs@npm:^16.1.0, yargs@npm:^16.2.0":
+"yargs@npm:^16.1.0":
   version: 16.2.0
   resolution: "yargs@npm:16.2.0"
   dependencies:
@@ -6955,9 +6955,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs@npm:^17.0.1, yargs@npm:^17.3.1":
-  version: 17.7.1
-  resolution: "yargs@npm:17.7.1"
+"yargs@npm:^17.0.1, yargs@npm:^17.3.1, yargs@npm:^17.7.2":
+  version: 17.7.2
+  resolution: "yargs@npm:17.7.2"
   dependencies:
     cliui: ^8.0.1
     escalade: ^3.1.1
@@ -6966,7 +6966,7 @@ __metadata:
     string-width: ^4.2.3
     y18n: ^5.0.5
     yargs-parser: ^21.1.1
-  checksum: 3d8a43c336a4942bc68080768664aca85c7bd406f018bad362fd255c41c8f4e650277f42fd65d543fce99e084124ddafee7bbfc1a5c6a8fda4cec78609dcf8d4
+  checksum: 73b572e863aa4a8cbef323dd911d79d193b772defd5a51aab0aca2d446655216f5002c42c5306033968193bdbf892a7a4c110b0d77954a7fdf563e653967b56a
   languageName: node
   linkType: hard
 

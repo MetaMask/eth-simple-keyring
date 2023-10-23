@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [5.1.1]
 ### Fixed
-- fix: treat undefined/null as [] in deserialize ([#166](https://github.com/MetaMask/eth-simple-keyring/pull/166))
+- Treat `undefined` and `null` as empty array in deserialize function ([#166](https://github.com/MetaMask/eth-simple-keyring/pull/166))
 
 ## [5.1.0]
 ### Changed

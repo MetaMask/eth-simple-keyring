@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.2]
+### Uncategorized
+- Bump `@metamask/utils` from `^8.1.0` to `^9.0.0` ([#177](https://github.com/MetaMask/eth-simple-keyring/pull/177))
+- Bump tar from 6.1.13 to 6.2.1 ([#173](https://github.com/MetaMask/eth-simple-keyring/pull/173))
+- chore(devdeps): @lavamoat/allow-scripts@^3.0.0->^3.0.4 ([#175](https://github.com/MetaMask/eth-simple-keyring/pull/175))
+- ci: update security code scanner file ([#172](https://github.com/MetaMask/eth-simple-keyring/pull/172))
+- chore: update CODEOWNERS ([#171](https://github.com/MetaMask/eth-simple-keyring/pull/171))
+- Enabling security code scanner ([#170](https://github.com/MetaMask/eth-simple-keyring/pull/170))
+- Bump ip from 2.0.0 to 2.0.1 ([#169](https://github.com/MetaMask/eth-simple-keyring/pull/169))
+
 ## [6.0.1]
 ### Fixed
 - Treat `undefined` and `null` as empty array in deserialize function ([#163](https://github.com/MetaMask/eth-simple-keyring/pull/163))
@@ -44,7 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING:** Remove redundant `newGethSignMessage` method ([#72](https://github.com/MetaMask/eth-simple-keyring/pull/72))
     - Consumers can use `signPersonalMessage` method as a replacement for `newGethSignMessage`.
 
-[Unreleased]: https://github.com/MetaMask/eth-simple-keyring/compare/v6.0.1...HEAD
+[Unreleased]: https://github.com/MetaMask/eth-simple-keyring/compare/v6.0.2...HEAD
+[6.0.2]: https://github.com/MetaMask/eth-simple-keyring/compare/v6.0.1...v6.0.2
 [6.0.1]: https://github.com/MetaMask/eth-simple-keyring/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/MetaMask/eth-simple-keyring/compare/v5.1.1...v6.0.0
 [5.1.1]: https://github.com/MetaMask/eth-simple-keyring/compare/v5.1.0...v5.1.1

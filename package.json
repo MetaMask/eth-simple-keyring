@@ -50,7 +50,7 @@
     "@metamask/eslint-config-typescript": "^11.1.0",
     "@types/ethereumjs-tx": "^1.0.1",
     "@types/jest": "^29.5.0",
-    "@types/node": "^18.15.10",
+    "@types/node": "~18.18.14",
     "@types/randombytes": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^5.57.0",
     "@typescript-eslint/parser": "^5.57.0",
@@ -70,9 +70,8 @@
     "typedoc": "^0.25.1",
     "typescript": "~4.8.4"
   },
-  "packageManager": "yarn@3.3.0",
   "engines": {
-    "node": "^16.20 || ^18.16 || >=20"
+    "node": "^18.18 || ^20.14 || >=22"
   },
   "publishConfig": {
     "access": "public",

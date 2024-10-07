@@ -1,5 +1,10 @@
 # Simple Keyring
 
+> [!WARNING]
+> This package has been moved into a
+> [new monorepo](https://github.com/MetaMask/accounts/tree/main/packages/keyring-eth-simple).
+> This repository is no longer in use, and pull requests will no longer be accepted.
+
 A simple JS class wrapped around [ethereumjs-wallet](https://github.com/ethereumjs/ethereumjs-wallet) designed to expose an interface common to many different signing strategies to be used in a `KeyringController`; such as the one used in [MetaMask](https://metamask.io/)
 
 ## The Keyring Class Protocol
